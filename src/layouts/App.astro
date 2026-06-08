@@ -4,6 +4,7 @@ import config from "$config";
 const { title, subtitle, description, author, article } = Astro.props;
 const gaId = (config as { gaMeasurementId?: string }).gaMeasurementId;
 const gaEnabled = !!gaId && /^G-[A-Z0-9]+$/.test(gaId) && gaId !== "G-XXXXXXXXXX";
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 ---
 
 <html lang={Astro.currentLocale}>
@@ -17,19 +18,19 @@ const gaEnabled = !!gaId && /^G-[A-Z0-9]+$/.test(gaId) && gaId !== "G-XXXXXXXXXX
 
 	<meta property="og:title" content={`${subtitle && `${subtitle} | `}${title}`} />
 	<meta property="og:type" content={(article && "article") || "website"} />
-	<meta property="og:image" content={new URL(`${import.meta.env.BASE_URL}/logo.png`, Astro.site)} />
+	<meta property="og:image" content={new URL(`${baseUrl}logo.png`, Astro.site)} />
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
 
 	{article && [<meta property="article:author" content={author} />, <meta property="article:published_time" content={article.timestamp.toISOString()} />, article.section && <meta property="article:section" content={article.section} />, article.tags?.map((tag: string) => <meta property="article:tag" content={tag} />)]}
 
-	<link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`} />
-	<link rel="icon" type="image/png" href={`${import.meta.env.BASE_URL}/favicon-96x96.png`} sizes="96x96" />
-	<link rel="shortcut icon" href={`${import.meta.env.BASE_URL}/favicon.ico`} />
-	<link rel="apple-touch-icon" sizes="180x180" href={`${import.meta.env.BASE_URL}/apple-touch-icon.png`} />
+	<link rel="icon" type="image/svg+xml" href={`${baseUrl}favicon.svg`} />
+	<link rel="icon" type="image/png" href={`${baseUrl}favicon-96x96.png`} sizes="96x96" />
+	<link rel="shortcut icon" href={`${baseUrl}favicon.ico`} />
+	<link rel="apple-touch-icon" sizes="180x180" href={`${baseUrl}apple-touch-icon.png`} />
 	<meta name="apple-mobile-web-app-title" content={title} />
-	<link rel="manifest" href={`${import.meta.env.BASE_URL}/site.webmanifest`} />
-	<link rel="sitemap" href={`${import.meta.env.BASE_URL}/sitemap-index.xml`} />
+	<link rel="manifest" href={`${baseUrl}site.webmanifest`} />
+	<link rel="sitemap" href={`${baseUrl}sitemap-index.xml`} />
 
 		<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200..900&family=Noto+Serif:ital,wght@1,200..900&family=Playwrite+MX:wght@100..400&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
 		<link rel="preload" as="style" href="https://fontsapi.zeoseven.com/442/main/result.css" onload="this.onload=null;this.rel='stylesheet'" />

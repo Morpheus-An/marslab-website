@@ -36,8 +36,8 @@ import reading from "./src/utils/remark/reading";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://marslab.tech",
-  base: "/",  // This is required for GitHub Pages subdirectory deployment
+  site: "https://lorenzo-0-0.github.io",
+  base: "/marslab-website",  // GitHub Pages project subpath; set to "/" when moving to marslab.tech
   trailingSlash: "never",
   i18n: {
     locales: ["en"],
