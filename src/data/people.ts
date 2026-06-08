@@ -173,6 +173,16 @@ export const people = [
 		}
 	},
 	{
+		name: "Bofan Lyu",
+		position: "PhD Student",
+		image: "/people/bofan-lyu.png",
+		bio: "Bofan Lyu is a PhD student at the NTU MARS Lab, supervised by Prof. Jianfei Yang.",
+		research: "His research interests include humanoid loco-manipulation and human-centered robotics.",
+		links: {
+			email: "lyub0002@e.ntu.edu.sg"
+		}
+	},
+	{
 		name: "Yunjiao Zhou",
 		position: "PhD Student (co-supervised)",
 		image: "/people/yunjiao-zhou.jpg",
