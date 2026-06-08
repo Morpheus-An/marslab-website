@@ -71,6 +71,19 @@
 	.code-dark();
 }
 
+/* Light/dark logo swap — dark mode shows the white-wordmark variant (mars_lab_logo_white.png) */
+.site-logo-dark {
+	display: none;
+}
+
+[data-theme="dark"] .site-logo-light {
+	display: none;
+}
+
+[data-theme="dark"] .site-logo-dark {
+	display: inline-block;
+}
+
 * {
 	margin: 0;
 	border: none;

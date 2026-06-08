@@ -36,34 +36,31 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 		
 		// Initialize publication filters if on publications page
 		const yearFilters = document.querySelectorAll('.year-filter');
-		const venueFilters = document.querySelectorAll('.venue-filter');
+		const areaFilters = document.querySelectorAll('.area-filter');
 		const publicationCards = document.querySelectorAll('.publication-card');
-		
+
 		if (publicationCards.length > 0) {
-			console.log('Initializing publications filters:', yearFilters.length, 'year filters,', venueFilters.length, 'venue filters,', publicationCards.length, 'cards');
-			
 			function filterPublications() {
 				const selectedYears = Array.from(yearFilters)
 					.filter((f: HTMLInputElement) => f.checked)
 					.map((f: HTMLInputElement) => parseInt(f.dataset.value || '0'));
-				
-				const selectedVenues = Array.from(venueFilters)
+
+				const selectedAreas = Array.from(areaFilters)
 					.filter((f: HTMLInputElement) => f.checked)
 					.map((f: HTMLInputElement) => f.dataset.value || '');
 
-				console.log('Filtering with years:', selectedYears, 'venues:', selectedVenues);
-
 				publicationCards.forEach((card: Element) => {
 					const year = parseInt((card as HTMLElement).dataset.year || '0');
-					const venue = (card as HTMLElement).dataset.venue || '';
+					const cardAreas = ((card as HTMLElement).dataset.tags || '').split('|').filter(Boolean);
 					let show = true;
 
 					if (selectedYears.length > 0) {
 						show = selectedYears.includes(year);
 					}
 
-					if (show && selectedVenues.length > 0) {
-						show = selectedVenues.includes(venue);
+					// A card matches if it carries at least one of the selected research areas
+					if (show && selectedAreas.length > 0) {
+						show = selectedAreas.some((a) => cardAreas.includes(a));
 					}
 
 					(card as HTMLElement).style.display = show ? '' : 'none';
@@ -73,11 +70,9 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 			yearFilters.forEach((checkbox) => {
 				checkbox.addEventListener('change', filterPublications);
 			});
-			venueFilters.forEach((checkbox) => {
+			areaFilters.forEach((checkbox) => {
 				checkbox.addEventListener('change', filterPublications);
 			});
-			
-			console.log('Publications filter listeners attached');
 		}
 		
 		// Initialize show more buttons if on people page
@@ -150,7 +145,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 		<div id="body" class="flex flex-col min-h-screen">
 			<header class="sticky top-0 flex items-center justify-between pt-3 pb-1 mb-4 bg-background z-2 sm:(static pb-12)">
 				<a href={getRelativeLocaleUrl(locale)} class="text-size-xl sm:text-size-3xl font-bold">
-					<img src={`${baseUrl}logo.svg`} alt={title} class="h-8 sm:h-10" />
+					<img src={`${baseUrl}mars_lab_logo_black.png`} alt={title} class="site-logo site-logo-light h-8 sm:h-10" />
+					<img src={`${baseUrl}mars_lab_logo_white.png`} alt={title} class="site-logo site-logo-dark h-8 sm:h-10" />
 				</a>
 
 				<Navigator {locale} {route} {baseUrl} client:load>
