@@ -93,17 +93,16 @@ export const people = [
 		}
 	},
 	{
-		name: "Jiaqi Bai",
+		name: "Tuo An",
 		position: "PhD Student",
-		image: "/people/jiaqi-bai.jpg",
-		bio: "Jiaqi Bai is a Ph.D. student at the NTU MARS Lab, advised by Prof. Jianfei Yang. He holds an MSc in Computer Science with Distinction from Newcastle University, UK.",
-		research: "His research interests include generative robot motion planning and visuomotor policies, integrating physical priors for robust trajectory representation with the performance optimization of generative algorithms (e.g., diffusion, flow matching) for real-time robotics.",
+		image: "/people/tuo-an.jpg",
+		bio: "Tuo An is a first-year PhD student at Nanyang Technological University, supervised by Prof. Jianfei Yang and supported by the NTU Graduate Research Scholarship. He received his Bachelor's degree from the School of Artificial Intelligence, Nanjing University.",
+		research: "His research interests focus on multimodal perception and embodied intelligence, with an emphasis on robust and efficient learning methods for agents operating in the physical world.",
 		links: {
-			website: "https://b1ue-jay.github.io/homepage/",
-			email: "jason-bai@outlook.com",
-			scholar: "https://scholar.google.com/citations?user=528YkNYAAAAJ&hl=en",
-			twitter: "https://x.com/Jason3973699328",
-			linkedin: "https://linkedin.com/in/9jason"
+			website: "https://morpheus-an.github.io/",
+			email: "ANTU0001@e.ntu.edu.sg",
+			scholar: "https://scholar.google.com/citations?user=Rn30BUYAAAAJ&hl=en",
+			linkedin: "https://www.linkedin.com/in/tuo-an-13894537b/"
 		}
 	},
 	{
@@ -121,19 +120,6 @@ export const people = [
 		}
 	},
 	{
-		name: "Tuo An",
-		position: "PhD Student",
-		image: "/people/tuo-an.jpg",
-		bio: "Tuo An is a first-year PhD student at Nanyang Technological University, supervised by Prof. Jianfei Yang and supported by the NTU Graduate Research Scholarship. He received his Bachelor's degree from the School of Artificial Intelligence, Nanjing University.",
-		research: "His research interests focus on multimodal perception and embodied intelligence, with an emphasis on robust and efficient learning methods for agents operating in the physical world.",
-		links: {
-			website: "https://morpheus-an.github.io/",
-			email: "ANTU0001@e.ntu.edu.sg",
-			scholar: "https://scholar.google.com/citations?user=Rn30BUYAAAAJ&hl=en",
-			linkedin: "https://www.linkedin.com/in/tuo-an-13894537b/"
-		}
-	},
-	{
 		name: "Xiangyu Chen",
 		position: "PhD Student",
 		image: "/people/xiangyu-chen.jpg",
@@ -144,18 +130,6 @@ export const people = [
 			email: "xiangyu.chen@ntu.edu.sg",
 			scholar: "https://scholar.google.com/citations?user=wEV8pmkAAAAJ&hl=en",
 			linkedin: "https://www.linkedin.com/in/xiangyu-chen-846877413/"
-		}
-	},
-	{
-		name: "Xinyan Chen",
-		position: "PhD Student",
-		image: "/people/xinyan-chen.jpg",
-		bio: "Xinyan Chen is a Mechanical Engineering Ph.D. student at Nanyang Technological University, advised by Prof. Jianfei Yang. He received his B.Eng. in Electrical and Electronic Engineering (Highest Distinction & Dean's List) from NTU.",
-		research: "His research centers on AIoT sensing and multimodal AI, recently focusing on multimodal foundation models that leverage complementary cross-modal representations for dexterous robotic manipulation.",
-		links: {
-			email: "chen1909@e.ntu.edu.sg",
-			scholar: "https://scholar.google.com.sg/citations?user=XGQNPHAAAAAJ&hl=en",
-			linkedin: "https://www.linkedin.com/in/xinyan-chen-49605a203/"
 		}
 	},
 	{
@@ -170,6 +144,32 @@ export const people = [
 			github: "https://github.com/gxyes",
 			twitter: "https://x.com/xinyingGUOXY",
 			linkedin: "https://linkedin.com/in/xinying-guo-3307a124b"
+		}
+	},
+	{
+		name: "Jiaqi Bai",
+		position: "PhD Student",
+		image: "/people/jiaqi-bai.jpg",
+		bio: "Jiaqi Bai is a Ph.D. student at the NTU MARS Lab, advised by Prof. Jianfei Yang. He holds an MSc in Computer Science with Distinction from Newcastle University, UK.",
+		research: "His research interests include generative robot motion planning and visuomotor policies, integrating physical priors for robust trajectory representation with the performance optimization of generative algorithms (e.g., diffusion, flow matching) for real-time robotics.",
+		links: {
+			website: "https://b1ue-jay.github.io/homepage/",
+			email: "jason-bai@outlook.com",
+			scholar: "https://scholar.google.com/citations?user=528YkNYAAAAJ&hl=en",
+			twitter: "https://x.com/Jason3973699328",
+			linkedin: "https://linkedin.com/in/9jason"
+		}
+	},
+	{
+		name: "Xinyan Chen",
+		position: "PhD Student",
+		image: "/people/xinyan-chen.jpg",
+		bio: "Xinyan Chen is a Mechanical Engineering Ph.D. student at Nanyang Technological University, advised by Prof. Jianfei Yang. He received his B.Eng. in Electrical and Electronic Engineering (Highest Distinction & Dean's List) from NTU.",
+		research: "His research centers on AIoT sensing and multimodal AI, recently focusing on multimodal foundation models that leverage complementary cross-modal representations for dexterous robotic manipulation.",
+		links: {
+			email: "chen1909@e.ntu.edu.sg",
+			scholar: "https://scholar.google.com.sg/citations?user=XGQNPHAAAAAJ&hl=en",
+			linkedin: "https://www.linkedin.com/in/xinyan-chen-49605a203/"
 		}
 	},
 	{
@@ -216,18 +216,6 @@ export const people = [
 	},
 	// Research Assistants
 	{
-		name: "Geng Li",
-		position: "Research Assistant",
-		image: "/people/geng-li.jpg",
-		bio: "Geng Li is a Research Assistant at Nanyang Technological University. He received his B.S. in Electrical Engineering from Shandong University.",
-		research: "His research interests include efficient and reliable intelligence, with a focus on efficient and dependable large models — spanning efficient AI, embodied AI, and reliable model deployment.",
-		links: {
-			website: "https://genglibot.github.io/Sam/",
-			email: "geng.li@ntu.edu.sg",
-			scholar: "https://scholar.google.com/citations?user=SZg1xeoAAAAJ&hl=zh-CN"
-		}
-	},
-	{
 		name: "Guohao Chen",
 		position: "Research Assistant",
 		image: "/people/guohao-chen.jpg",
@@ -273,6 +261,18 @@ export const people = [
 			email: "YANSHUO001@e.ntu.edu.sg",
 			github: "https://github.com/Lu-Yanshuo",
 			linkedin: "https://www.linkedin.com/in/yanshuo-lu-3113ab345/"
+		}
+	},
+	{
+		name: "Geng Li",
+		position: "Research Assistant",
+		image: "/people/geng-li.jpg",
+		bio: "Geng Li is a Research Assistant at Nanyang Technological University. He received his B.S. in Electrical Engineering from Shandong University.",
+		research: "His research interests include efficient and reliable intelligence, with a focus on efficient and dependable large models — spanning efficient AI, embodied AI, and reliable model deployment.",
+		links: {
+			website: "https://genglibot.github.io/Sam/",
+			email: "geng.li@ntu.edu.sg",
+			scholar: "https://scholar.google.com/citations?user=SZg1xeoAAAAJ&hl=zh-CN"
 		}
 	},
 ];
