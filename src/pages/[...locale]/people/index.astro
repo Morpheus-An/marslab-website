@@ -12,92 +12,118 @@ export async function getStaticPaths() {
 const { locale = i18n!.defaultLocale } = Astro.params;
 const t = i18nit(locale);
 const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+// Anchor id used by the home-page photo links (/people#<id>)
+const personId = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
+const initials = (name: string) => name.split(' ').map(n => n[0]).join('');
+
+// Profile links in a fixed display order (rendered as icon-only chips)
+const socialLinks = (p: any) => [
+	p.links.website && { icon: "lucide:globe", label: "Website", url: p.links.website },
+	p.links.email && { icon: "lucide:mail", label: "Email", url: `mailto:${p.links.email}` },
+	p.links.scholar && { icon: "lucide:graduation-cap", label: "Scholar", url: p.links.scholar },
+	p.links.github && { icon: "simple-icons:github", label: "GitHub", url: p.links.github },
+	p.links.linkedin && { icon: "simple-icons:linkedin", label: "LinkedIn", url: p.links.linkedin },
+	p.links.resume && { icon: "lucide:file-search", label: "Résumé", url: p.links.resume },
+	p.links.twitter && { icon: "simple-icons:x", label: "Twitter", url: p.links.twitter },
+].filter(Boolean) as { icon: string; label: string; url: string }[];
+
+// Group members into role sections (each person lands in exactly one)
+const sectionDefs = [
+	{ title: "Postdoctoral Researchers", match: (p: any) => p.position === "Postdoc" },
+	{ title: "PhD Students", match: (p: any) => p.position.startsWith("PhD") },
+	{ title: "Master's Students", match: (p: any) => /MEng|Master/.test(p.position) },
+	{ title: "Research Assistants", match: (p: any) => p.position === "Research Assistant" },
+];
+
+const pi = people.find(p => p.position === "Principal Investigator");
+const sections = sectionDefs
+	.map(s => ({ title: s.title, members: people.filter(s.match) }))
+	.filter(s => s.members.length > 0);
+
+// Safety net: surface anyone not placed in the PI slot or a section
+const placed = new Set([pi, ...sections.flatMap(s => s.members)].filter(Boolean));
+const others = people.filter(p => !placed.has(p));
+if (others.length) sections.push({ title: "Team", members: others });
 ---
 
 <Base title={t("navigation.people") || "People"} {locale}>
-	<main class="flex flex-col grow people-page-container">
-		<h1 class="text-3xl font-bold mb-12">People</h1>
-		
-		<div class="people-grid">
-			{people.map((person) => {
-				const personId = person.name.toLowerCase().replace(/[^a-z]/g, '');
-				return (
-				<article class="person-card" id={personId}>
-					<div class="person-layout">
-						<!-- Left side: Image -->
-						<div class="person-image">
-							{person.image ? (
-								<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="lazy" />
+	<main class="flex flex-col grow">
+		<h1 class="text-3xl font-bold mb-8">People</h1>
+
+		{pi && (
+			<section class="role-section">
+				<h2 class="role-heading">Principal Investigator</h2>
+				<article class="pi-feature" id={personId(pi.name)}>
+					<div class="pi-photo-wrap">
+						<div class="pi-photo">
+							{pi.image ? (
+								<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="lazy" />
 							) : (
-								<div class="image-placeholder">
-									<span>{person.name.split(' ').map(n => n[0]).join('')}</span>
-								</div>
+								<div class="photo-placeholder"><span>{initials(pi.name)}</span></div>
 							)}
 						</div>
-
-						<!-- Right side: Content -->
-						<div class="person-content">
-							<h2 class="person-name">{person.name}</h2>
-							<p class="person-position">{person.position}</p>
-							
-							<div class="person-bio-container">
-								<div class="person-bio">
-									<p>{person.bio}</p>
-									<p>{person.research}</p>
-								</div>
-								<button class="show-more-btn" aria-label="Show more">Show more</button>
+						{pi.bio && (
+							<div class="bio-pop">
+								<p class="bio-pop-name">{pi.name}</p>
+								<p class="bio-pop-text">{pi.bio}</p>
 							</div>
-
-							<!-- Links -->
+						)}
+					</div>
+					<div class="pi-info">
+						<h3 class="pi-name">{pi.name}</h3>
+						<p class="pi-role">{pi.position}</p>
+						{pi.research && <p class="pi-research">{pi.research}</p>}
+						{socialLinks(pi).length > 0 && (
 							<div class="person-links">
-								{person.links.website && (
-									<a href={person.links.website} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="lucide:globe" size={16} />
-										<span>Website</span>
+								{socialLinks(pi).map((l) => (
+									<a href={l.url} class="person-link" title={l.label} aria-label={l.label} target="_blank" rel="noopener noreferrer">
+										<Icon name={l.icon} size={16} />
 									</a>
-								)}
-								{person.links.email && (
-									<a href={`mailto:${person.links.email}`} class="person-link">
-										<Icon name="lucide:mail" size={16} />
-										<span>Email</span>
-									</a>
-								)}
-								{person.links.resume && (
-									<a href={person.links.resume} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="lucide:file-search" size={16} />
-										<span>Résumé</span>
-									</a>
-								)}
-								{person.links.twitter && (
-									<a href={person.links.twitter} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="simple-icons:x" size={16} />
-										<span>Twitter</span>
-									</a>
-								)}
-								{person.links.scholar && (
-									<a href={person.links.scholar} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="lucide:graduation-cap" size={16} />
-										<span>Scholar</span>
-									</a>
-								)}
-								{person.links.github && (
-									<a href={person.links.github} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="simple-icons:github" size={16} />
-										<span>GitHub</span>
-									</a>
-								)}
-								{person.links.linkedin && (
-									<a href={person.links.linkedin} target="_blank" rel="noopener noreferrer" class="person-link">
-										<Icon name="simple-icons:linkedin" size={16} />
-										<span>LinkedIn</span>
-									</a>
-								)}
+								))}
 							</div>
-						</div>
+						)}
 					</div>
 				</article>
-			)})}
-		</div>
+			</section>
+		)}
+
+		{sections.map((section) => (
+			<section class="role-section">
+				<h2 class="role-heading">{section.title}</h2>
+				<div class="people-grid">
+					{section.members.map((person) => (
+						<article class="person" id={personId(person.name)}>
+							<div class="person-photo">
+								{person.image ? (
+									<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="lazy" />
+								) : (
+									<div class="photo-placeholder"><span>{initials(person.name)}</span></div>
+								)}
+							</div>
+							{person.bio && (
+								<div class="bio-pop">
+									<p class="bio-pop-name">{person.name}</p>
+									<p class="bio-pop-text">{person.bio}</p>
+									{person.research && <p class="bio-pop-text">{person.research}</p>}
+								</div>
+							)}
+							<h3 class="person-name">{person.name}</h3>
+							<p class="person-role">{person.position}</p>
+							{socialLinks(person).length > 0 && (
+								<div class="person-links">
+									{socialLinks(person).map((l) => (
+										<a href={l.url} class="person-link" title={l.label} aria-label={l.label} target="_blank" rel="noopener noreferrer">
+											<Icon name={l.icon} size={16} />
+										</a>
+									))}
+								</div>
+							)}
+						</article>
+					))}
+				</div>
+			</section>
+		))}
 
 		<section class="alumni-section">
 			<h2 class="alumni-heading">Alumni</h2>
@@ -119,16 +145,243 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 </Base>
 
 <style>
+	/* Role sections */
+	.role-section {
+		margin-bottom: 3.5rem;
+	}
+
+	.role-heading {
+		font-size: 1.4rem;
+		font-weight: 700;
+		color: var(--primary-color);
+		margin: 0 0 1.5rem 0;
+		padding-bottom: 0.4rem;
+		border-bottom: 2px solid #0E8C86;
+		display: inline-block;
+	}
+
+	/* Featured PI block */
+	.pi-feature {
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 2rem;
+		align-items: start;
+		scroll-margin-top: 5rem;
+	}
+
+	.pi-photo-wrap {
+		position: relative;
+		width: 200px;
+		flex-shrink: 0;
+	}
+
+	.pi-photo {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		border-radius: 8px;
+		overflow: hidden;
+		border: 1px solid var(--shadow-color);
+		background: var(--block-color);
+	}
+
+	.pi-photo img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.pi-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		min-width: 0;
+	}
+
+	.pi-name {
+		font-size: 1.6rem;
+		font-weight: 700;
+		color: var(--primary-color);
+		margin: 0;
+		line-height: 1.2;
+	}
+
+	.pi-role {
+		font-size: 1rem;
+		font-weight: 500;
+		color: var(--secondary-color);
+		margin: 0;
+	}
+
+	.pi-research {
+		font-size: 0.98rem;
+		line-height: 1.65;
+		color: var(--primary-color);
+		margin: 0.4rem 0 0.2rem 0;
+		max-width: 66ch;
+	}
+
+	/* Member grid */
+	.people-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+		gap: 2rem 1.5rem;
+	}
+
+	.person {
+		display: flex;
+		flex-direction: column;
+		scroll-margin-top: 5rem;
+		position: relative;
+	}
+
+	.person-photo {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		border-radius: 8px;
+		overflow: hidden;
+		background: var(--block-color);
+		border: 1px solid var(--shadow-color);
+	}
+
+	.person-photo img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transition: transform 0.3s ease;
+	}
+
+	.person:hover .person-photo img {
+		transform: scale(1.04);
+	}
+
+	.photo-placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: linear-gradient(135deg, var(--block-color) 0%, var(--shadow-color) 100%);
+		font-size: 2rem;
+		font-weight: 600;
+		color: var(--secondary-color);
+		text-transform: uppercase;
+	}
+
+	.person-name {
+		font-size: 1.05rem;
+		font-weight: 600;
+		color: var(--primary-color);
+		margin: 0.7rem 0 0.1rem 0;
+		line-height: 1.3;
+	}
+
+	.person-role {
+		font-size: 0.85rem;
+		color: var(--secondary-color);
+		margin: 0;
+	}
+
+	/* Icon-only profile links */
+	.person-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-top: 0.6rem;
+	}
+
+	.person-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 30px;
+		height: 30px;
+		background: var(--block-color);
+		color: #0E8C86;
+		border-radius: 6px;
+		text-decoration: none;
+		transition: background 0.2s ease, transform 0.1s ease;
+	}
+
+	.person-link:hover {
+		background: #DBF1EF;
+		transform: translateY(-2px);
+	}
+
+	.person-link :global(figure) {
+		display: flex;
+		align-items: center;
+		margin: 0;
+	}
+
+	.person-link :global(svg) {
+		width: 16px;
+		height: 16px;
+		flex-shrink: 0;
+	}
+
+	/* Bio popover — revealed when hovering a person's photo */
+	.bio-pop {
+		position: absolute;
+		top: -6px;
+		left: -10px;
+		width: calc(100% + 20px);
+		z-index: 30;
+		background: var(--background-color);
+		border: 1px solid #0E8C86;
+		border-radius: 10px;
+		box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
+		padding: 0.85rem 0.9rem;
+		max-height: 340px;
+		overflow-y: auto;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(6px) scale(0.96);
+		transform-origin: top center;
+		transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+		pointer-events: none;
+	}
+
+	.person:hover .bio-pop,
+	.pi-photo-wrap:hover .bio-pop {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0) scale(1);
+		pointer-events: auto;
+	}
+
+	.bio-pop-name {
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--primary-color);
+		margin: 0 0 0.4rem 0;
+	}
+
+	.bio-pop-text {
+		font-size: 0.8rem;
+		line-height: 1.55;
+		color: var(--secondary-color);
+		margin: 0;
+	}
+
+	.bio-pop-text + .bio-pop-text {
+		margin-top: 0.5rem;
+	}
+
 	/* Alumni — plain text list */
 	.alumni-section {
-		margin-top: 4rem;
+		margin-top: 1rem;
 	}
 
 	.alumni-heading {
-		font-size: 1.75rem;
+		font-size: 1.4rem;
 		font-weight: 700;
 		color: var(--primary-color);
 		margin: 0 0 0.75rem 0;
+		padding-bottom: 0.4rem;
+		border-bottom: 2px solid #0E8C86;
+		display: inline-block;
 	}
 
 	.alumni-intro {
@@ -169,261 +422,29 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 		white-space: nowrap;
 	}
 
-	.people-page-container {
-		/* Break out of the parent 1000px constraint */
-		width: 100vw;
-		max-width: 100vw;
-		position: relative;
-		left: 50%;
-		right: 50%;
-		margin-left: -50vw;
-		margin-right: -50vw;
-		padding: 0 4rem;
-	}
-
-	.people-grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 3rem 3rem;
-		width: 100%;
-		max-width: 1600px;
-		margin: 0 auto;
-	}
-
-	.person-card {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-	}
-
-	.person-layout {
-		display: grid;
-		grid-template-columns: 200px 1fr;
-		gap: 1.5rem;
-		align-items: start;
-	}
-
-	.person-image {
-		width: 200px;
-		height: 200px;
-		border-radius: 4px;
-		overflow: hidden;
-		flex-shrink: 0;
-	}
-
-	.person-image img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.image-placeholder {
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: linear-gradient(135deg, var(--block-color) 0%, var(--shadow-color) 100%);
-		font-size: 3rem;
-		font-weight: 600;
-		color: var(--secondary-color);
-		text-transform: uppercase;
-	}
-
-	.person-content {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		padding-top: 0.25rem;
-	}
-
-	.person-name {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: var(--primary-color);
-		margin: 0;
-		line-height: 1.2;
-	}
-
-	.person-position {
-		font-size: 1rem;
-		color: var(--secondary-color);
-		margin: 0;
-		font-weight: 500;
-	}
-
-	.person-bio-container {
-		position: relative;
-		margin-top: 0.5rem;
-	}
-
-	.person-bio {
-		max-height: 6.4rem;
-		overflow: hidden;
-		position: relative;
-		transition: max-height 0.3s ease;
-	}
-
-	.person-bio-container.has-overflow .person-bio:not(.expanded)::after {
-		content: "";
-		position: absolute;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		height: 2.4rem;
-		background: linear-gradient(to bottom, transparent, var(--background-color));
-		pointer-events: none;
-	}
-
-	.person-bio.expanded {
-		max-height: none;
-	}
-
-	.person-bio p {
-		font-size: 0.95rem;
-		line-height: 1.6;
-		color: var(--primary-color);
-		margin: 0;
-	}
-
-	.person-bio p + p {
-		margin-top: 0.75rem;
-	}
-
-	.show-more-btn {
-		display: none;
-		margin-top: 0.5rem;
-		background: none;
-		border: none;
-		color: #0E8C86;
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		padding: 0;
-		text-decoration: underline;
-		transition: opacity 0.2s ease;
-	}
-
-	.show-more-btn:hover {
-		opacity: 0.7;
-	}
-
-	.person-bio-container.has-overflow .show-more-btn {
-		display: block;
-	}
-
-	.person-links {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem;
-		margin-top: 1rem;
-	}
-
-	.person-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 1rem;
-		background: var(--block-color);
-		color: #0E8C86;
-		text-decoration: none;
-		border-radius: 4px;
-		font-size: 0.9rem;
-		font-weight: 500;
-		transition: background 0.2s ease, transform 0.1s ease;
-	}
-
-	.person-link:hover {
-		background: var(--shadow-color);
-		transform: scale(1.02);
-	}
-
-	.person-link :global(figure) {
-		display: flex;
-		align-items: center;
-		margin: 0;
-	}
-
-	.person-link :global(svg) {
-		width: 16px;
-		height: 16px;
-		flex-shrink: 0;
-	}
-
-	/* Responsive Design - Conservative breakpoints */
-	
-	/* Switch to single column before things get squashed */
-	@media (max-width: 1150px) {
-		.people-grid {
+	/* Responsive */
+	@media (max-width: 600px) {
+		.pi-feature {
 			grid-template-columns: 1fr;
-			gap: 3rem;
-		}
-	}
-
-	/* Adjust layout for tablets */
-	@media (max-width: 900px) {
-		.people-page-container {
-			padding: 0 2rem;
-		}
-
-		.person-layout {
 			gap: 1.25rem;
 		}
 
-		.person-image {
-			width: 180px;
-			height: 180px;
-		}
-
-		.person-layout {
-			grid-template-columns: 180px 1fr;
-		}
-	}
-
-	/* Mobile layout */
-	@media (max-width: 768px) {
-		.people-page-container {
-			padding: 0 1rem;
-		}
-
-		.person-layout {
-			grid-template-columns: 1fr;
-			gap: 1.5rem;
-		}
-
-		.person-image {
-			width: 200px;
-			height: 200px;
-			margin: 0 auto;
-		}
-
-		.image-placeholder {
-			font-size: 2.5rem;
-		}
-
-		.person-content {
-			text-align: center;
-		}
-
-		.person-name {
-			font-size: 1.25rem;
-		}
-
-		.person-position {
-			font-size: 0.9rem;
-		}
-
-		.person-bio p {
-			font-size: 0.9rem;
-			text-align: left;
-		}
-
-		.person-links {
-			justify-content: center;
+		.pi-photo {
+			width: 150px;
 		}
 
 		.people-grid {
-			gap: 2.5rem;
+			grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+			gap: 1.5rem 1rem;
+		}
+
+		.person-name {
+			font-size: 0.98rem;
+		}
+
+		/* No hover on touch devices — keep the static layout */
+		.bio-pop {
+			display: none;
 		}
 	}
 </style>
