@@ -10,7 +10,6 @@ import i18nit from "$i18n";
 import { people } from "$data/people";
 
 export async function getStaticPaths() {
-	// Create path for each locale, omitting default locale from URL
 	return i18n!.locales.map(locale => ({ params: { locale: locale == i18n?.defaultLocale ? undefined : (locale as string) } }));
 }
 
@@ -19,7 +18,7 @@ const { locale = i18n!.defaultLocale } = Astro.params;
 const t = i18nit(locale);
 const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
 
-// Get preface content, sorted by timestamp (newest first)
+// Preface (intro paragraph) — newest first
 const prefaces = (
 	await getCollection("preface", preface => {
 		const [, id] = preface.id.split("/");
@@ -27,34 +26,78 @@ const prefaces = (
 		return true;
 	})
 ).sort((a, b) => b.data.timestamp.getTime() - a.data.timestamp.getTime());
-
 const preface = prefaces[0];
-// Render preface content if available, otherwise use empty object
 const { Content } = preface ? await render(preface) : ({} as any);
 
-// Filter people with images for the grid
+// Anchor ids must match the People page exactly
+const slugify = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
+
 const peopleWithImages = people.filter(person => person.image);
 
-// --- Hero showcase: members (center, horizontal scroll) flanked by robots (sides, vertical scroll) ---
-// Robot platform photos; right column reversed for visual variety.
+// ---- Constellation placement: PI = sun (center), others = planets on 3 orbits ----
+const pi = peopleWithImages[0];
+const orbiters = peopleWithImages.slice(1);
+const RING_CAPACITY = [5, 7, 9];
+const ringBuckets: any[][] = RING_CAPACITY.map(() => []);
+orbiters.forEach((person, i) => {
+	let r = 0, n = i;
+	while (r < RING_CAPACITY.length - 1 && n >= RING_CAPACITY[r]) { n -= RING_CAPACITY[r]; r++; }
+	ringBuckets[r].push(person);
+});
+const RING_CONFIG = [
+	{ radius: 116, size: 64, duration: 74,  reverse: false, startAngle: 8 },
+	{ radius: 182, size: 52, duration: 98,  reverse: true,  startAngle: 30 },
+	{ radius: 242, size: 44, duration: 124, reverse: false, startAngle: 16 },
+];
+const constellation = ringBuckets.map((members, ri) => {
+	const cfg = RING_CONFIG[ri];
+	const step = 360 / Math.max(members.length, 1);
+	return {
+		...cfg,
+		members: members.map((person, mi) => ({ person, id: slugify(person.name), angle: cfg.startAngle + mi * step })),
+	};
+});
+
+// ---- Robotic platforms (side vertical marquee) ----
 const robots = [
-	{ name: "Unitree G1", image: "/equipment/unitree-g1.jpg" },
-	{ name: "ROKAE Human.X", image: "/equipment/rokae-humanx.jpg" },
-	{ name: "Galaxea R1 Lite", image: "/equipment/galaxea-r1.jpg" },
-	{ name: "Franka Panda", image: "/equipment/franka-panda.jpg" },
-	{ name: "UR5e", image: "/equipment/ur5e.jpg" },
-	{ name: "UFactory xArm", image: "/equipment/ufactory-xarm.jpg" },
-	{ name: "Sharpa Wave", image: "/equipment/sharpa-wave.jpg" },
+	{ name: "Unitree G1", type: "Humanoid", qty: 2, image: "/equipment/unitree-g1.jpg" },
+	{ name: "ROKAE Human.X", type: "Humanoid", qty: 3, image: "/equipment/rokae-humanx.jpg" },
+	{ name: "Galaxea R1 Lite", type: "Mobile Manipulator", qty: 1, image: "/equipment/galaxea-r1.jpg" },
+	{ name: "Franka Panda", type: "Robot Arm", qty: 1, image: "/equipment/franka-panda.jpg" },
+	{ name: "UR5e", type: "Robot Arm", qty: 1, image: "/equipment/ur5e.jpg" },
+	{ name: "UFactory xArm", type: "Robot Arm", qty: 1, image: "/equipment/ufactory-xarm.jpg" },
+	{ name: "Sharpa Wave", type: "Dexterous Hand", qty: 2, image: "/equipment/sharpa-wave.jpg" },
 ];
 const robotsLeft = robots;
 const robotsRight = [...robots].reverse();
 
-// Distribute member photos round-robin into rows; each row scrolls horizontally.
-const PEOPLE_ROWS = 3;
-const peopleRows: any[][] = Array.from({ length: PEOPLE_ROWS }, () => []);
-peopleWithImages.forEach((person, i) => peopleRows[i % PEOPLE_ROWS].push(person));
+// ---- News (structured; show half, expand the rest) ----
+const news = [
+	{ month: "April 2026",     text: 'Our paper "A2A: Action-to-Action Flow Matching" was accepted. Congratulations to Jindou Jia and Gen Li!', venue: "RSS 2026" },
+	{ month: "March 2026",     text: "We received an NVIDIA Academic Grant on Robotics." },
+	{ month: "February 2026",  text: "Three papers (two main + one findings) were accepted.", venue: "CVPR 2026" },
+	{ month: "February 2026",  text: "We received a Microsoft Seed Grant from Microsoft Research Asia." },
+	{ month: "January 2026",   text: "Our real-world reinforcement learning paper was accepted. Congratulations to Xiangyu Chen!", venue: "ICRA 2026" },
+	{ month: "January 2026",   text: "Two papers were accepted. Congratulations to Xinyan Chen and Chenxi Jiang!", venue: "ICLR 2026" },
+	{ month: "November 2025",  text: "Three papers were accepted.", venue: "AAAI 2026" },
+	{ month: "September 2025", text: "Three papers — HoloLLM, Benford's Curse, and Intend to Move — were accepted.", venue: "NeurIPS 2025" },
+	{ month: "August 2025",    text: "We welcomed five new members to the lab." },
+	{ month: "June 2025",      text: "Two papers were accepted.", venue: "IROS 2025" },
+	{ month: "May 2025",       text: "Our humanoid robot MARS-H joined the lab." },
+	{ month: "February 2025",  text: "We established a partnership with Abio for robotic lab automation." },
+	{ month: "February 2025",  text: "Our project was supported by Microsoft Accelerating Foundation Models Research." },
+	{ month: "February 2025",  text: "Our Feedback Neural Network paper was selected as an oral (top 1.8%).", venue: "ICLR 2025" },
+	{ month: "January 2025",   text: "Two papers — X-Fi and Feedback Neural Network — were accepted.", venue: "ICLR 2025" },
+	{ month: "January 2025",   text: "Our point registration paper was accepted. Congratulations to Geng Li!", venue: "ICRA 2025" },
+	{ month: "January 2025",   text: "The lab joined Project Aria by Meta." },
+	{ month: "September 2024", text: "Chuhao Zhou won first place at the Data Distillation Challenge.", venue: "ECCV 2024" },
+	{ month: "September 2024", text: "The MARS Lab officially launched at the Robotics Research Centre, NTU." },
+];
+const NEWS_VISIBLE = 9;
+const newsHead = news.slice(0, NEWS_VISIBLE);
+const newsTail = news.slice(NEWS_VISIBLE);
 
-// Lab & campus photos shown below the News section
+// Lab & campus photos (kept from existing design)
 const gallery = [
 	{ image: "/gallery/lab-room.png", caption: "Our Lab" },
 	{ image: "/gallery/lab-platforms.jpg", caption: "Robotic Platforms" },
@@ -63,39 +106,73 @@ const gallery = [
 ---
 
 <Base title={t("navigation.home")} {locale}>
-	<main class="flex flex-col gap-5 sm:gap-10 flex-grow">
-		<!-- Hero showcase: robots scroll vertically on the sides, members scroll horizontally in the center -->
+	<main class="flex flex-col gap-6 sm:gap-12 flex-grow">
+		<!-- Hero: robotic platforms scroll on the sides; members orbit the PI in the center -->
 		<section class="showcase" aria-label="MARS Lab members and robotic platforms">
-			<!-- Left: robots, vertical scroll (up) -->
 			<div class="showcase-col">
 				<div class="v-track v-up">
 					{[...robotsLeft, ...robotsLeft].map((r) => (
-						<div class="tile robot-tile"><img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" /></div>
+						<article class="robot-tile">
+							<div class="robot-photo">
+								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" />
+								<span class="robot-qty">×{r.qty}</span>
+							</div>
+							<div class="robot-meta">
+								<span class="robot-name">{r.name}</span>
+								<span class="robot-type">{r.type}</span>
+							</div>
+						</article>
 					))}
 				</div>
 			</div>
 
-			<!-- Center: members, horizontal scroll (alternating directions per row), clickable -->
 			<div class="showcase-center">
-				{peopleRows.map((row, i) => (
-					<div class={`h-row ${i % 2 === 0 ? "h-left" : "h-right"}`}>
-						{[...row, ...row].map((p) => {
-							const personId = p.name.toLowerCase().replace(/[^a-z]/g, '');
-							return (
-								<a class="tile person-tile" href={getRelativeLocaleUrl(locale, `/people#${personId}`)} title={p.name} aria-label={p.name}>
-									<img src={`${baseUrl}${p.image.replace(/^\//, '')}`} alt={p.name} loading="lazy" />
-								</a>
-							);
-						})}
+				<div class="constellation-wrap">
+					<div class="constellation" role="img" aria-label="MARS Lab members orbiting Prof. Jianfei Yang">
+						{RING_CONFIG.map((cfg) => (
+							<span class="orbit-ring" style={`--d:${cfg.radius * 2}px`} aria-hidden="true"></span>
+						))}
+
+						<a href={getRelativeLocaleUrl(locale, `/people#${slugify(pi.name)}`)} class="sun" title={pi.name}>
+							<span class="sun-halo" aria-hidden="true"></span>
+							<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="eager" width="128" height="128" />
+							<span class="planet-label sun-label">{pi.name}</span>
+						</a>
+
+						{constellation.map((ring) => (
+							<div class:list={["orbit", { "orbit--rev": ring.reverse }]} style={`--dur:${ring.duration}s`}>
+								{ring.members.map((m) => (
+									<a
+										class="planet"
+										href={getRelativeLocaleUrl(locale, `/people#${m.id}`)}
+										title={m.person.name}
+										style={`--angle:${m.angle}deg; --radius:${ring.radius}px; --size:${ring.size}px; --dur:${ring.duration}s`}
+									>
+										<span class="planet-spin">
+											<img src={`${baseUrl}${m.person.image.replace(/^\//, '')}`} alt={m.person.name} loading="lazy" width={ring.size} height={ring.size} />
+											<span class="planet-label">{m.person.name}</span>
+										</span>
+									</a>
+								))}
+							</div>
+						))}
 					</div>
-				))}
+				</div>
 			</div>
 
-			<!-- Right: robots, vertical scroll (down) -->
 			<div class="showcase-col">
 				<div class="v-track v-down">
 					{[...robotsRight, ...robotsRight].map((r) => (
-						<div class="tile robot-tile"><img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" /></div>
+						<article class="robot-tile">
+							<div class="robot-photo">
+								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" />
+								<span class="robot-qty">×{r.qty}</span>
+							</div>
+							<div class="robot-meta">
+								<span class="robot-name">{r.name}</span>
+								<span class="robot-type">{r.type}</span>
+							</div>
+						</article>
 					))}
 				</div>
 			</div>
@@ -107,12 +184,39 @@ const gallery = [
 					<article class="markdown">
 						<Content />
 					</article>
-					<a href={getRelativeLocaleUrl(locale, "/preface")} class="self-end my-2 text-size-sm c-secondary">
-						—— {Time.date.locale(preface.data.timestamp, locale)}
-					</a>
 				</section>
 			)
 		}
+
+		<!-- News timeline (show half, expand the rest — CSS only) -->
+		<section class="news-section" aria-label="News">
+			<h2 class="news-heading">News</h2>
+			<ol class="news-list">
+				{newsHead.map((n) => (
+					<li class="news-item">
+						<span class="news-month">{n.month}</span>
+						<span class="news-body">{n.text}{n.venue && <code class="news-venue">{n.venue}</code>}</span>
+					</li>
+				))}
+			</ol>
+
+			<input type="checkbox" id="news-toggle" class="news-toggle" aria-hidden="true" />
+
+			<ol class="news-list news-extra">
+				{newsTail.map((n) => (
+					<li class="news-item">
+						<span class="news-month">{n.month}</span>
+						<span class="news-body">{n.text}{n.venue && <code class="news-venue">{n.venue}</code>}</span>
+					</li>
+				))}
+			</ol>
+
+			<label for="news-toggle" class="news-more-btn">
+				<span class="label-more">Show {newsTail.length} more</span>
+				<span class="label-less">Show less</span>
+				<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+			</label>
+		</section>
 
 		<!-- Lab & campus photo gallery -->
 		<section class="gallery" aria-label="MARS Lab and NTU campus">
@@ -123,173 +227,276 @@ const gallery = [
 				</figure>
 			))}
 		</section>
-
 	</main>
 </Base>
 
 <style>
+	/* ===================== HERO SHOWCASE ===================== */
 	.showcase {
 		display: flex;
-		gap: 0.6rem;
-		height: 360px;
-		margin-top: 0.5rem;
-		width: 100%;
-	}
-
-	/* Side robot columns — vertical marquee */
-	.showcase-col {
-		width: 140px;
-		flex-shrink: 0;
+		align-items: stretch;
+		justify-content: center;
+		gap: clamp(0.6rem, 2.2vw, 1.6rem);
+		height: 560px;
+		margin-top: 0.25rem;
 		overflow: hidden;
-		-webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-		mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
 	}
 
+	/* --- side robot columns: vertical marquee --- */
+	.showcase-col {
+		position: relative;
+		width: 168px;
+		flex: 0 0 168px;
+		overflow: hidden;
+		-webkit-mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
+		        mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
+	}
 	.v-track {
 		display: flex;
 		flex-direction: column;
+		gap: 0.85rem;
 		will-change: transform;
 	}
+	.v-up   { animation: v-up   40s linear infinite; }
+	.v-down { animation: v-down 40s linear infinite; }
+	.showcase-col:hover .v-track { animation-play-state: paused; }
 
-	.v-up { animation: marquee-up 26s linear infinite; }
-	.v-down { animation: marquee-down 30s linear infinite; }
-
-	/* Center member area — horizontal marquee rows */
-	.showcase-center {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-		overflow: hidden;
-		-webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-		mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-	}
-
-	.h-row {
-		display: flex;
-		flex: 1;
-		min-height: 0;
-		will-change: transform;
-	}
-
-	.h-left { animation: marquee-left 55s linear infinite; }
-	.h-right { animation: marquee-right 48s linear infinite; }
-
-	/* Pause all motion on hover so members are easy to click */
-	.showcase:hover .v-track,
-	.showcase:hover .h-row {
-		animation-play-state: paused;
-	}
-
-	.tile {
-		flex-shrink: 0;
-		border-radius: 8px;
-		overflow: hidden;
-		border: 1px solid var(--shadow-color);
-		background: var(--block-color);
-	}
-
-	/* trailing margins (not flex gap) keep the duplicated track seamless at -50% */
 	.robot-tile {
-		width: 100%;
-		aspect-ratio: 1 / 1;
-		margin-bottom: 0.6rem;
+		flex: 0 0 auto;
+		border: 1px solid var(--shadow-color);
+		border-radius: 12px;
+		overflow: hidden;
+		background: linear-gradient(180deg, var(--background-color) 0%, var(--block-color) 100%);
+		box-shadow: 0 2px 8px rgba(42, 42, 40, 0.07);
+		transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+	}
+	.robot-tile:hover {
+		border-color: var(--remark-color);
+		box-shadow: 0 9px 22px rgba(42, 42, 40, 0.14);
+		transform: translateY(-2px);
+	}
+	.robot-photo { position: relative; aspect-ratio: 1 / 1; overflow: hidden; }
+	.robot-photo img { width: 100%; height: 100%; object-fit: cover; display: block; background: var(--block-color); }
+	.robot-qty {
+		position: absolute;
+		top: 8px; right: 8px;
+		font-family: var(--monospace);
+		font-size: 0.72rem;
+		letter-spacing: 0.02em;
+		color: #fff;
+		background: linear-gradient(135deg, #A51C30 0%, #8a1728 100%);
+		border-radius: 999px;
+		padding: 1px 8px;
+		box-shadow: 0 1px 4px rgba(42, 42, 40, 0.24);
+	}
+	.robot-meta {
+		display: flex; flex-direction: column; gap: 2px;
+		padding: 0.5rem 0.7rem 0.65rem;
+		border-top: 1px solid var(--block-color);
+	}
+	.robot-name { font-size: 0.88rem; font-weight: 700; line-height: 1.2; color: var(--primary-color); }
+	.robot-type {
+		font-family: var(--monospace);
+		font-size: 0.6rem; letter-spacing: 0.09em;
+		text-transform: uppercase;
+		color: var(--remark-color);
 	}
 
-	.person-tile {
-		height: 100%;
-		aspect-ratio: 1 / 1;
-		margin-right: 0.6rem;
-		display: block;
-		cursor: pointer;
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	@keyframes v-up   { from { transform: translateY(0); }    to { transform: translateY(-50%); } }
+	@keyframes v-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+
+	/* --- center: orbital constellation --- */
+	.showcase-center { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; }
+
+	.constellation-wrap { position: relative; width: 540px; height: 540px; flex: 0 0 auto; }
+	.constellation { position: absolute; top: 0; left: 0; width: 540px; height: 540px; transform-origin: top left; }
+
+	.orbit-ring {
+		position: absolute; top: 50%; left: 50%;
+		width: var(--d); height: var(--d);
+		border: 1px solid var(--shadow-color);
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		opacity: 0.4;
+		pointer-events: none;
 	}
 
-	.person-tile:hover {
-		transform: scale(1.05);
-		box-shadow: 0 4px 12px var(--shadow-color);
-		z-index: 2;
+	/* sun (PI) */
+	.sun {
+		position: absolute; top: 50%; left: 50%;
+		width: 128px; height: 128px; margin: -64px 0 0 -64px;
+		border-radius: 50%; z-index: 30; display: block;
+	}
+	.sun img {
+		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+		border: 1px solid var(--shadow-color);
+		box-shadow: 0 6px 18px rgba(42, 42, 40, 0.20);
+		position: relative; z-index: 1;
+		transition: box-shadow 0.25s ease;
+	}
+	.sun-halo {
+		position: absolute; inset: -9px; border-radius: 50%;
+		border: 1.5px solid rgba(165, 28, 48, 0.32);
+		box-shadow: 0 0 0 7px rgba(165, 28, 48, 0.045);
+		pointer-events: none;
+	}
+	.sun:hover img { box-shadow: 0 9px 26px rgba(42, 42, 40, 0.28); }
+
+	/* orbit ring container — slow drift */
+	.orbit { position: absolute; inset: 0; animation: orbit-spin var(--dur) linear infinite; z-index: 20; }
+	.orbit--rev { animation-direction: reverse; }
+
+	/* planet placed statically on its ring */
+	.planet {
+		position: absolute; top: 50%; left: 50%;
+		width: var(--size); height: var(--size);
+		margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+		transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius)));
+	}
+	/* counter-spin keeps faces upright (same duration as the orbit) */
+	.planet-spin {
+		display: block; width: 100%; height: 100%;
+		animation: planet-upright var(--dur) linear infinite;
+		transform-origin: center center;
+	}
+	.orbit--rev .planet-spin { animation-direction: reverse; }
+
+	.planet img {
+		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+		border: 1px solid var(--shadow-color);
+		box-shadow: 0 3px 10px rgba(42, 42, 40, 0.16);
+		background: var(--block-color);
+		transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 	}
 
-	.tile img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		display: block;
+	/* name labels — revealed on hover */
+	.planet-label {
+		position: absolute; left: 50%; top: calc(100% + 7px);
+		transform: translateX(-50%);
+		white-space: nowrap;
+		font-family: var(--serif); font-size: 0.72rem;
+		color: var(--primary-color);
+		background: var(--background-color);
+		border: 1px solid var(--shadow-color);
+		border-radius: 5px; padding: 1px 7px;
+		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.12);
+		opacity: 0; pointer-events: none;
+		transition: opacity 0.2s ease;
+		z-index: 6;
+	}
+	.sun-label { font-size: 0.84rem; font-weight: 700; top: calc(100% + 11px); }
+
+	@keyframes orbit-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+	@keyframes planet-upright {
+		from { transform: rotate(calc(-1 * var(--angle))); }
+		to   { transform: rotate(calc(-1 * var(--angle) - 360deg)); }
 	}
 
-	@keyframes marquee-up {
-		from { transform: translateY(0); }
-		to { transform: translateY(-50%); }
+	/* hover: freeze the system, zoom the chosen planet, dim the rest */
+	.constellation:hover .orbit,
+	.constellation:hover .planet-spin,
+	.constellation:focus-within .orbit,
+	.constellation:focus-within .planet-spin { animation-play-state: paused; }
+
+	.constellation:hover .planet,
+	.constellation:focus-within .planet { opacity: 0.5; transition: opacity 0.25s ease; }
+	.constellation .planet:hover,
+	.constellation .planet:focus-visible { opacity: 1; z-index: 40; }
+
+	.planet:hover img,
+	.planet:focus-visible img {
+		transform: scale(1.55);
+		border: 1.5px solid #A51C30;
+		box-shadow: 0 8px 22px rgba(42, 42, 40, 0.30);
 	}
-	@keyframes marquee-down {
-		from { transform: translateY(-50%); }
-		to { transform: translateY(0); }
-	}
-	@keyframes marquee-left {
-		from { transform: translateX(0); }
-		to { transform: translateX(-50%); }
-	}
-	@keyframes marquee-right {
-		from { transform: translateX(-50%); }
-		to { transform: translateX(0); }
-	}
+	.planet:hover .planet-label,
+	.planet:focus-visible .planet-label,
+	.sun:hover .planet-label,
+	.sun:focus-visible .planet-label { opacity: 1; }
 
 	@media (prefers-reduced-motion: reduce) {
-		.v-track, .h-row { animation: none; }
+		.v-track, .orbit, .planet-spin { animation: none !important; }
 	}
 
-	/* Lab & campus gallery */
-	.gallery {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
+	/* ===================== NEWS TIMELINE ===================== */
+	.news-section { display: flex; flex-direction: column; }
+	.news-heading {
+		font-size: 1.6rem; font-weight: 700;
+		padding-bottom: 0.4rem; margin-bottom: 0.3rem;
+		border-bottom: 1px solid var(--shadow-color);
+	}
+	.news-list { list-style: none; margin: 0; padding: 0; }
+	.news-item {
+		display: grid; grid-template-columns: 136px 1fr; gap: 0.85rem;
+		align-items: baseline; padding: 0.72rem 0;
+		border-bottom: 1px solid var(--block-color);
+	}
+	.news-month { font-weight: 700; font-size: 0.9rem; color: var(--primary-color); white-space: nowrap; }
+	.news-body { font-size: 0.93rem; line-height: 1.55; color: var(--secondary-color); }
+	.news-venue {
+		display: inline-block; margin-left: 0.45rem;
+		font-family: var(--monospace); font-size: 0.66rem; letter-spacing: 0.03em;
+		vertical-align: 0.07em;
+		color: #A51C30;
+		background: rgba(165, 28, 48, 0.07);
+		border: 1px solid rgba(165, 28, 48, 0.26);
+		border-radius: 4px; padding: 1px 6px;
 	}
 
-	.gallery-item {
-		margin: 0;
-		display: flex;
-		flex-direction: column;
-	}
+	.news-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+	.news-extra { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.45s ease, opacity 0.35s ease; }
+	.news-toggle:checked ~ .news-extra { max-height: 900px; opacity: 1; }
 
-	.gallery-item img {
-		width: 100%;
-		aspect-ratio: 4 / 3;
-		object-fit: cover;
-		border-radius: 10px;
+	.news-more-btn {
+		align-self: center;
+		display: inline-flex; align-items: center; gap: 0.45rem;
+		margin-top: 1.1rem; padding: 0.45rem 1.15rem;
+		font-size: 0.85rem; color: var(--primary-color);
+		background: var(--background-color);
 		border: 1px solid var(--shadow-color);
-		display: block;
+		border-radius: 8px;
+		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.07);
+		cursor: pointer; user-select: none;
+		transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+	}
+	.news-more-btn:hover { border-color: #A51C30; color: #A51C30; box-shadow: 0 5px 13px rgba(42, 42, 40, 0.12); }
+	.chev { width: 14px; height: 14px; transition: transform 0.3s ease; }
+	.label-less { display: none; }
+	.news-toggle:checked ~ .news-more-btn .label-more { display: none; }
+	.news-toggle:checked ~ .news-more-btn .label-less { display: inline; }
+	.news-toggle:checked ~ .news-more-btn .chev { transform: rotate(180deg); }
+	.news-toggle:focus-visible ~ .news-more-btn { outline: 2px solid #A51C30; outline-offset: 2px; }
+
+	/* ===================== GALLERY ===================== */
+	.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+	.gallery-item { margin: 0; display: flex; flex-direction: column; }
+	.gallery-item img {
+		width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+		border-radius: 10px; border: 1px solid var(--shadow-color); display: block;
 		transition: transform 0.3s ease, box-shadow 0.3s ease;
 	}
+	.gallery-item:hover img { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(42, 42, 40, 0.10); }
+	.gallery-item figcaption { margin-top: 0.5rem; text-align: center; font-size: 0.85rem; color: var(--secondary-color); }
 
-	.gallery-item:hover img {
-		transform: translateY(-4px);
-		box-shadow: 0 14px 30px rgba(0, 0, 0, 0.10);
+	/* ===================== RESPONSIVE ===================== */
+	@media (max-width: 1000px) {
+		.showcase { height: 480px; }
+		.showcase-col { width: 132px; flex-basis: 132px; }
+		.constellation-wrap { width: 432px; height: 432px; }
+		.constellation { transform: scale(0.8); }
 	}
-
-	.gallery-item figcaption {
-		margin-top: 0.5rem;
-		text-align: center;
-		font-size: 0.85rem;
-		color: var(--secondary-color);
-	}
-
 	@media (max-width: 768px) {
-		.showcase {
-			height: 260px;
-			gap: 0.4rem;
-		}
-		.showcase-col {
-			width: 88px;
-		}
-		.robot-tile { margin-bottom: 0.4rem; }
-		.person-tile { margin-right: 0.4rem; }
-		.showcase-center { gap: 0.4rem; }
-
-		.gallery {
-			grid-template-columns: 1fr;
-			gap: 0.8rem;
-		}
+		.showcase { height: 380px; }
+		.showcase-col { display: none; }
+		.constellation-wrap { width: 356px; height: 356px; }
+		.constellation { transform: scale(0.66); }
+		.news-item { grid-template-columns: 1fr; gap: 0.15rem; }
+		.news-month { font-size: 0.82rem; }
+		.gallery { grid-template-columns: 1fr; gap: 0.8rem; }
+	}
+	@media (max-width: 480px) {
+		.showcase { height: 300px; }
+		.constellation-wrap { width: 281px; height: 281px; }
+		.constellation { transform: scale(0.52); }
 	}
 </style>
