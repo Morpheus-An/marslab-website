@@ -55,19 +55,11 @@ if (others.length) sections.push({ title: "Team", members: others });
 			<section class="role-section">
 				<h2 class="role-heading">Principal Investigator</h2>
 				<article class="pi-feature" id={personId(pi.name)}>
-					<div class="pi-photo-wrap">
-						<div class="pi-photo">
-							{pi.image ? (
-								<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="lazy" />
-							) : (
-								<div class="photo-placeholder"><span>{initials(pi.name)}</span></div>
-							)}
-						</div>
-						{pi.bio && (
-							<div class="bio-pop">
-								<p class="bio-pop-name">{pi.name}</p>
-								<p class="bio-pop-text">{pi.bio}</p>
-							</div>
+					<div class="pi-photo">
+						{pi.image ? (
+							<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="lazy" />
+						) : (
+							<div class="photo-placeholder"><span>{initials(pi.name)}</span></div>
 						)}
 					</div>
 					<div class="pi-info">
@@ -101,13 +93,6 @@ if (others.length) sections.push({ title: "Team", members: others });
 									<div class="photo-placeholder"><span>{initials(person.name)}</span></div>
 								)}
 							</div>
-							{person.bio && (
-								<div class="bio-pop">
-									<p class="bio-pop-name">{person.name}</p>
-									<p class="bio-pop-text">{person.bio}</p>
-									{person.research && <p class="bio-pop-text">{person.research}</p>}
-								</div>
-							)}
 							<h3 class="person-name">{person.name}</h3>
 							<p class="person-role">{person.position}</p>
 							{socialLinks(person).length > 0 && (
@@ -169,14 +154,8 @@ if (others.length) sections.push({ title: "Team", members: others });
 		scroll-margin-top: 5rem;
 	}
 
-	.pi-photo-wrap {
-		position: relative;
-		width: 200px;
-		flex-shrink: 0;
-	}
-
 	.pi-photo {
-		width: 100%;
+		width: 200px;
 		aspect-ratio: 1 / 1;
 		border-radius: 8px;
 		overflow: hidden;
@@ -232,7 +211,6 @@ if (others.length) sections.push({ title: "Team", members: others });
 		display: flex;
 		flex-direction: column;
 		scroll-margin-top: 5rem;
-		position: relative;
 	}
 
 	.person-photo {
@@ -321,54 +299,6 @@ if (others.length) sections.push({ title: "Team", members: others });
 		flex-shrink: 0;
 	}
 
-	/* Bio popover — revealed when hovering a person's photo */
-	.bio-pop {
-		position: absolute;
-		top: -6px;
-		left: -10px;
-		width: calc(100% + 20px);
-		z-index: 30;
-		background: var(--background-color);
-		border: 1px solid #0E8C86;
-		border-radius: 10px;
-		box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
-		padding: 0.85rem 0.9rem;
-		max-height: 340px;
-		overflow-y: auto;
-		opacity: 0;
-		visibility: hidden;
-		transform: translateY(6px) scale(0.96);
-		transform-origin: top center;
-		transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-		pointer-events: none;
-	}
-
-	.person:hover .bio-pop,
-	.pi-photo-wrap:hover .bio-pop {
-		opacity: 1;
-		visibility: visible;
-		transform: translateY(0) scale(1);
-		pointer-events: auto;
-	}
-
-	.bio-pop-name {
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: var(--primary-color);
-		margin: 0 0 0.4rem 0;
-	}
-
-	.bio-pop-text {
-		font-size: 0.8rem;
-		line-height: 1.55;
-		color: var(--secondary-color);
-		margin: 0;
-	}
-
-	.bio-pop-text + .bio-pop-text {
-		margin-top: 0.5rem;
-	}
-
 	/* Alumni — plain text list */
 	.alumni-section {
 		margin-top: 1rem;
@@ -440,11 +370,6 @@ if (others.length) sections.push({ title: "Team", members: others });
 
 		.person-name {
 			font-size: 0.98rem;
-		}
-
-		/* No hover on touch devices — keep the static layout */
-		.bio-pop {
-			display: none;
 		}
 	}
 </style>
