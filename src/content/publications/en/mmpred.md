@@ -12,5 +12,5 @@ image: "/publications/junqiao-mmpred-aaai26.png"
 paper: "https://arxiv.org/pdf/2512.00345"
 tags:
   - "RF Sensing"
-  - "Human Sensing"
+  - "Wireless Human Sensing"
 ---

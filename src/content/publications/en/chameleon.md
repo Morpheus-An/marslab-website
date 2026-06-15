@@ -14,5 +14,5 @@ image: "/publications/xinying-chameleon-arxiv26.png"
 paper: "https://arxiv.org/abs/2603.24576"
 code: "https://github.com/gxyes/MARS_Chameleon"
 tags:
-  - "Manipulation"
+  - "Robot Manipulation"
 ---

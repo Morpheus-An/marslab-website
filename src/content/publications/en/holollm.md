@@ -10,7 +10,7 @@ paper: "https://arxiv.org/abs/2505.17645"
 website: "https://chuhaozhou99.github.io/HoloLLM"
 code: "https://github.com/NTUMARS/HoloLLM"
 tags:
-  - "Multimodal Learning"
-  - "Human Sensing"
-  - "Vision-Language Model"
+  - "Multimodal Foundation Models"
+  - "Wireless Human Sensing"
+  - "Vision-Language Models"
 ---

@@ -15,5 +15,5 @@ website: "https://sites.google.com/view/mmcotta"
 doi: "10.1109/ICCV51070.2023.01724"
 tags:
   - "Domain Adaptation"
-  - "Multimodal Learning"
+  - "Multimodal Foundation Models"
 ---

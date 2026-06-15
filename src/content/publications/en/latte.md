@@ -16,5 +16,5 @@ website: "https://sites.google.com/view/eccv24-latte"
 code: "https://github.com/AronCao49/Latte"
 tags:
   - "Domain Adaptation"
-  - "Multimodal Learning"
+  - "Multimodal Foundation Models"
 ---

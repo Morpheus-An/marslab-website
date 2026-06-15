@@ -15,5 +15,5 @@ code: "https://github.com/pridy999/metafi_pose_estimation"
 doi: "10.1109/JIOT.2023.3262940"
 tags:
   - "RF Sensing"
-  - "Human Sensing"
+  - "Wireless Human Sensing"
 ---

@@ -16,5 +16,5 @@ image: "/publications/geng-occamtoken-arxiv26.png"
 paper: "https://arxiv.org/abs/2605.29657"
 tags:
   - "Efficient AI"
-  - "Vision-Language Model"
+  - "Vision-Language Models"
 ---

@@ -62,97 +62,64 @@ const opportunities = [
 ---
 
 <Base title="Contact" {locale}>
-	<main class="flex flex-col grow join-page">
-		<h1 class="page-title">Contact</h1>
-		
-	<section class="intro-section">
+	<main class="flex flex-col grow">
+		<h1 class="text-3xl font-bold mb-6">Contact</h1>
+
 		<p class="intro-text">
 			We welcome students and researchers interested in robotics, embodied AI, computer vision,
 			multimodal learning, world models, and human–robot interaction to join or collaborate with our lab.
 			For general inquiries, please reach out by <a href={`mailto:${contactEmail}`} class="inline-link">email</a>.
 		</p>
-	</section>
 
-		<div class="opportunities-grid">
+		<section class="openings">
 			{opportunities.map((opp) => (
-				<article class="opportunity-card">
-					<div class="card-header">
-						<div class="icon-wrapper">
-							<Icon name={opp.icon} size={24} />
-						</div>
-						<h2 class="card-title">{opp.title}</h2>
+				<article class="opening">
+					<div class="opening-head">
+						<span class="opening-icon"><Icon name={opp.icon} size={20} /></span>
+						<h2 class="opening-title">{opp.title}</h2>
 					</div>
-					
-					<p class="card-description">{opp.description}</p>
-					
-					{opp.details.length > 0 && (
-						<ul class="card-details">
-							{opp.details.map((detail) => (
-								<li>{detail}</li>
-							))}
-						</ul>
-					)}
 
-					{opp.links && opp.links.length > 0 && (
-						<div class="card-links">
-							{opp.links.map((link) => (
-								link.url ? (
-									<a href={link.url} target="_blank" rel="noopener noreferrer" class="external-link">
-										<Icon name="lucide:external-link" size={14} />
+					<div class="opening-content">
+						<p class="opening-desc">{opp.description}</p>
+
+						{opp.details.length > 0 && (
+							<ul class="opening-details">
+								{opp.details.map((detail) => (
+									<li>{detail}</li>
+								))}
+							</ul>
+						)}
+
+						{opp.links && opp.links.length > 0 && (
+							<div class="opening-links">
+								{opp.links.map((link) => (
+									<a href={link.url} class="opening-link">
 										<span>{link.text}</span>
+										<Icon name="lucide:arrow-right" size={15} />
 									</a>
-								) : (
-									<span class="external-link">
-										<Icon name="lucide:mail" size={14} />
-										<span>{link.text}</span>
-									</span>
-								)
-							))}
-						</div>
-					)}
+								))}
+							</div>
+						)}
+					</div>
 				</article>
 			))}
-		</div>
+		</section>
 	</main>
 </Base>
 
 <style>
-	.join-page {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 2rem;
-	}
-
-	.page-title {
-		font-size: 2.5rem;
-		font-weight: 700;
-		color: var(--primary-color);
-		margin-bottom: 2rem;
-		text-align: center;
-	}
-
-	.intro-section {
-		text-align: center;
-		margin-bottom: 3rem;
-		padding: 2rem;
-		background: var(--block-color);
-		border-radius: 8px;
-		border: 1px solid var(--shadow-color);
-	}
-
 	.intro-text {
-		font-size: 1.1rem;
-		line-height: 1.7;
-		color: var(--primary-color);
-		margin: 0;
-		max-width: 800px;
-		margin-left: auto;
-		margin-right: auto;
+		font-size: 1.05rem;
+		line-height: 1.75;
+		color: var(--secondary-color);
+		max-width: 72ch;
+		margin: 0 0 1rem 0;
 	}
 
 	.inline-link {
-		color: #A51C30;
+		color: #0E8C86;
 		text-decoration: underline;
+		text-underline-offset: 2px;
 		font-weight: 600;
 		transition: opacity 0.2s ease;
 	}
@@ -161,167 +128,126 @@ const opportunities = [
 		opacity: 0.7;
 	}
 
-	.opportunities-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-		gap: 2rem;
-		margin-bottom: 3rem;
-	}
-
-	.opportunity-card {
-		background: var(--background-color);
-		border: 1px solid var(--shadow-color);
-		border-radius: 8px;
-		padding: 1.75rem;
-		transition: all 0.2s ease;
+	/* Editorial listing — no cards/boxes, entries separated by thin rules */
+	.openings {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
 	}
 
-	.opportunity-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-		border-color: #A51C30;
+	.opening {
+		display: grid;
+		grid-template-columns: 240px 1fr;
+		gap: 2.5rem;
+		padding: 2rem 0;
+		border-top: 1px solid var(--shadow-color);
 	}
 
-	.card-header {
+	.opening:last-child {
+		border-bottom: 1px solid var(--shadow-color);
+	}
+
+	.opening-head {
 		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 0.5rem;
+		align-items: flex-start;
+		gap: 0.55rem;
 	}
 
-	.icon-wrapper {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 48px;
-		height: 48px;
-		background: linear-gradient(135deg, #A51C30 0%, #8a1728 100%);
-		border-radius: 8px;
-		color: white;
+	.opening-icon {
+		display: inline-flex;
+		color: #0E8C86;
+		margin-top: 0.15rem;
 		flex-shrink: 0;
 	}
 
-	.icon-wrapper :global(figure) {
+	.opening-icon :global(figure) {
 		display: flex;
 		margin: 0;
 	}
 
-	.card-title {
-		font-size: 1.4rem;
+	.opening-title {
+		font-size: 1.25rem;
 		font-weight: 600;
+		line-height: 1.3;
 		color: var(--primary-color);
 		margin: 0;
 	}
 
-	.card-description {
+	.opening-content {
+		min-width: 0;
+	}
+
+	.opening-desc {
 		font-size: 1rem;
-		line-height: 1.6;
+		line-height: 1.65;
 		color: var(--primary-color);
-		margin: 0;
+		margin: 0 0 0.85rem 0;
 	}
 
-	.card-details {
+	.opening-details {
 		list-style: none;
 		padding: 0;
-		margin: 0;
+		margin: 0 0 1.1rem 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: 0.6rem;
 	}
 
-	.card-details li {
+	.opening-details li {
 		font-size: 0.95rem;
 		line-height: 1.6;
 		color: var(--secondary-color);
-		padding-left: 1.5rem;
+		padding-left: 1.2rem;
 		position: relative;
 	}
 
-	.card-details li::before {
-		content: "•";
+	.opening-details li::before {
+		content: "—";
 		position: absolute;
-		left: 0.5rem;
-		color: #A51C30;
-		font-weight: bold;
+		left: 0;
+		color: #0E8C86;
 	}
 
-	.card-links {
+	.opening-links {
 		display: flex;
-		gap: 0.75rem;
 		flex-wrap: wrap;
-		margin-top: 0.5rem;
+		gap: 1.5rem;
 	}
 
-	.external-link {
+	.opening-link {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.4rem;
-		padding: 0.4rem 0.85rem;
-		background: var(--block-color);
-		color: #A51C30;
+		gap: 0.35rem;
+		color: #0E8C86;
+		font-weight: 600;
+		font-size: 0.95rem;
 		text-decoration: none;
-		border-radius: 4px;
-		font-size: 0.875rem;
-		font-weight: 500;
-		transition: all 0.2s ease;
 	}
 
-	.external-link:hover {
-		background: var(--shadow-color);
-		transform: scale(1.05);
-	}
-
-	.external-link :global(figure) {
+	.opening-link :global(figure) {
 		display: flex;
 		margin: 0;
+		transition: transform 0.2s ease;
 	}
 
-	/* Responsive Design */
+	.opening-link:hover {
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.opening-link:hover :global(figure) {
+		transform: translateX(3px);
+	}
+
+	/* Stack the title above the content on narrow screens */
 	@media (max-width: 768px) {
-		.join-page {
-			padding: 0 1rem;
-		}
-
-		.page-title {
-			font-size: 2rem;
-		}
-
-		.intro-section {
-			padding: 1.5rem;
+		.opening {
+			grid-template-columns: 1fr;
+			gap: 0.85rem;
+			padding: 1.6rem 0;
 		}
 
 		.intro-text {
 			font-size: 1rem;
 		}
-
-		.opportunities-grid {
-			grid-template-columns: 1fr;
-			gap: 1.5rem;
-		}
-
-		.opportunity-card {
-			padding: 1.5rem;
-		}
-
-		.card-title {
-			font-size: 1.2rem;
-		}
-
-	}
-
-	@media (max-width: 480px) {
-		.card-header {
-			flex-direction: column;
-			align-items: flex-start;
-		}
-
-		.icon-wrapper {
-			width: 40px;
-			height: 40px;
-		}
 	}
 </style>
-

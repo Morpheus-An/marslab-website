@@ -16,6 +16,6 @@ code: "https://github.com/xyanchen/WiFi-CSI-Sensing-Benchmark"
 doi: "10.1016/j.patter.2023.100703"
 tags:
   - "RF Sensing"
-  - "Benchmarks"
-  - "Human Sensing"
+  - "Benchmarks & Datasets"
+  - "Wireless Human Sensing"
 ---

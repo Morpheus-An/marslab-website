@@ -36,6 +36,9 @@ const publications = defineCollection({
         authors: z.array(z.string()),
         venue: z.string(),
         year: z.number().int(),
+        // Optional YYYY-MM[-DD] used to order papers within a year (overrides the
+        // arXiv-id recency fallback). Handy when there is no arXiv link yet.
+        date: z.string().optional(),
         award: z.string().optional(),
         image: z.string().optional(),
         paper: z.string().url().optional(),

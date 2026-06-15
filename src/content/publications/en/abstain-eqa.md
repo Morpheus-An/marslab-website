@@ -13,6 +13,6 @@ image: "/publications/tao-abstaineqa-cvpr26.png"
 paper: "https://arxiv.org/pdf/2512.04597"
 website: "https://abstaineqa.github.io/"
 tags:
-  - "Benchmarks"
-  - "Vision-Language Model"
+  - "Benchmarks & Datasets"
+  - "Vision-Language Models"
 ---

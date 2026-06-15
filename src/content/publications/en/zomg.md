@@ -12,7 +12,7 @@ image: "/publications/yunjiao-zomg-aaai26.png"
 paper: "https://arxiv.org/pdf/2511.15379"
 code: "https://github.com/pridy999/ZOMG"
 tags:
-  - "Human Sensing"
+  - "Wireless Human Sensing"
   - "Domain Adaptation"
-  - "Multimodal Learning"
+  - "Multimodal Foundation Models"
 ---

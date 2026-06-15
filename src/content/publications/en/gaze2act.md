@@ -20,6 +20,7 @@ paper: "https://arxiv.org/abs/2605.30282"
 website: "https://zuo-kuangji.github.io/Gaze2Act/"
 code: "https://github.com/zuo-kuangji/Gaze2Act"
 tags:
-  - "Manipulation"
-  - "Vision-Language Model"
+  - "Robot Manipulation"
+  - "Vision-Language-Action"
+  - "Humanoid Robot"
 ---

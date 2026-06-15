@@ -10,7 +10,7 @@ paper: "https://arxiv.org/abs/2410.10167"
 website: "https://xyanchen.github.io/X-Fi"
 code: "https://github.com/xyanchen/X-Fi"
 tags:
-  - "Multimodal Learning"
-  - "Human Sensing"
+  - "Multimodal Foundation Models"
+  - "Wireless Human Sensing"
   - "RF Sensing"
 ---

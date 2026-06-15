@@ -13,5 +13,5 @@ website: "https://reagan1311.github.io/mask2iv/"
 code: "https://github.com/Reagan1311/Mask2IV"
 tags:
   - "Video Understanding"
-  - "Manipulation"
+  - "Robot Manipulation"
 ---

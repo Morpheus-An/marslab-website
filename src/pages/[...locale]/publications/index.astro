@@ -19,16 +19,18 @@ const publications = await getCollection("publications", publication => !publica
 
 // Canonical research-area order for the topic filter (matches the tags on each paper)
 const RESEARCH_AREAS = [
-	"Manipulation",
 	"World Models",
-	"Vision-Language Model",
-	"Multimodal Learning",
+	"Vision-Language-Action",
+	"Humanoid Robot",
+	"Robot Manipulation",
+	"Vision-Language Models",
+	"Multimodal Foundation Models",
 	"RF Sensing",
-	"Human Sensing",
+	"Wireless Human Sensing",
 	"Domain Adaptation",
 	"Video Understanding",
-	"Benchmarks",
 	"Efficient AI",
+	"Benchmarks & Datasets",
 ];
 
 // Rank a tag by the canonical order (unknown tags sort last)
@@ -40,9 +42,28 @@ const areaRank = (area: string) => {
 // Order a paper's tags by the canonical research-area order
 const orderedTags = (tags?: string[]) => [...(tags ?? [])].sort((a, b) => areaRank(a) - areaRank(b));
 
-// Sort by: year desc → title
+// Primary link for a paper — title and thumbnail point here
+const primaryLink = (pub: any): string | undefined => pub.data.paper || pub.data.website || pub.data.code || undefined;
+
+// Show the venue, appending the year only when the venue text doesn't already contain one
+const venueLabel = (venue: string, year: number) => /\d{4}/.test(venue) ? venue : `${venue} ${year}`;
+
+// Within-year recency key (newest first). Prefer an explicit `date` (YYYY-MM),
+// otherwise parse the month from the arXiv id (arxiv.org/abs|pdf/YYMM.NNNNN).
+// Returns a YYMM number; 0 when unknown (sorts last within its year).
+const recencyKey = (pub: any): number => {
+	const explicit = String(pub.data.date ?? "").match(/^(\d{4})-(\d{2})/);
+	if (explicit) return parseInt(explicit[1].slice(2) + explicit[2]);
+	const arxiv = String(pub.data.paper ?? "").match(/arxiv\.org\/(?:abs|pdf)\/(\d{2})(\d{2})\./);
+	if (arxiv) return parseInt(arxiv[1] + arxiv[2]);
+	return 0;
+};
+
+// Sort newest first: year desc → recency (month) desc → title
 const sortedPublications = publications.sort((a, b) => {
 	if (b.data.year !== a.data.year) return b.data.year - a.data.year;
+	const diff = recencyKey(b) - recencyKey(a);
+	if (diff !== 0) return diff;
 	return a.data.title.localeCompare(b.data.title);
 });
 
@@ -61,25 +82,39 @@ const areas = [...knownAreas, ...extraAreas];
 		<h1 class="text-3xl font-bold mb-8">Publications</h1>
 
 		<div class="publications-container">
-			<!-- Publications Grid -->
+			<!-- Publications list: one row per paper -->
 			<div class="publications-main">
 				<div class="publications-grid">
-					{sortedPublications.map((pub) => (
+					{sortedPublications.map((pub) => {
+						const link = primaryLink(pub);
+						const thumb = pub.data.image ? (
+							<img src={`${baseUrl}${pub.data.image.replace(/^\//, '')}`} alt={pub.data.title} loading="lazy" />
+						) : (
+							<div class="placeholder-image"><span class="year-badge">{pub.data.year}</span></div>
+						);
+						return (
 						<article class="publication-card" data-year={pub.data.year} data-tags={orderedTags(pub.data.tags).join("|")}>
-							<div class="publication-image">
-								{pub.data.image ? (
-									<img src={`${baseUrl}${pub.data.image.replace(/^\//, '')}`} alt={pub.data.title} loading="lazy" />
+							<div class="pub-aside">
+								{link ? (
+									<a class="pub-thumb" href={link} target="_blank" rel="noopener noreferrer">{thumb}</a>
 								) : (
-									<div class="placeholder-image">
-										<span class="year-badge">{pub.data.year}</span>
-									</div>
+									<div class="pub-thumb">{thumb}</div>
 								)}
+
+								<div class="pub-venue-row">
+									<span class="pub-venue">{venueLabel(pub.data.venue, pub.data.year)}</span>
+									{pub.data.award && <span class="award-badge">{pub.data.award}</span>}
+								</div>
 							</div>
 
-							<div class="publication-content">
-								<h2 class="publication-title">{pub.data.title}</h2>
+							<div class="pub-body">
+								<h2 class="publication-title">
+									{link ? (
+										<a href={link} target="_blank" rel="noopener noreferrer">{pub.data.title}</a>
+									) : pub.data.title}
+								</h2>
 
-								<p class="publication-meta">{pub.data.year}</p>
+								<p class="publication-authors">{pub.data.authors.join(", ")}</p>
 
 								{pub.data.tags && pub.data.tags.length > 0 && (
 									<div class="publication-topics">
@@ -88,10 +123,6 @@ const areas = [...knownAreas, ...extraAreas];
 										))}
 									</div>
 								)}
-
-								<p class="publication-authors">
-									{pub.data.authors.join(', ')}
-								</p>
 
 								{(pub.data.paper || pub.data.website || pub.data.code) && (
 									<div class="publication-links">
@@ -117,7 +148,8 @@ const areas = [...knownAreas, ...extraAreas];
 								)}
 							</div>
 						</article>
-					))}
+						);
+					})}
 				</div>
 			</div>
 
@@ -232,45 +264,64 @@ const areas = [...knownAreas, ...extraAreas];
 		accent-color: var(--primary-color);
 	}
 
-	/* Publications Grid */
+	/* Publications list — one row per paper */
 	.publications-main {
 		min-width: 0;
 	}
 
 	.publications-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-		gap: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.75rem;
 		width: 100%;
 	}
 
 	.publication-card {
+		display: grid;
+		grid-template-columns: 250px 1fr;
+		gap: 1.5rem;
+		align-items: start;
+		padding-bottom: 1.75rem;
+		border-bottom: 1px solid var(--shadow-color);
+	}
+
+	.publication-card:last-child {
+		padding-bottom: 0;
+		border-bottom: none;
+	}
+
+	/* Left column: thumbnail with the action links stacked beneath it */
+	.pub-aside {
 		display: flex;
 		flex-direction: column;
-		background: var(--background-color);
-		border: 1px solid var(--shadow-color);
+		gap: 0.6rem;
+		width: 250px;
+	}
+
+	.pub-thumb {
+		display: block;
+		width: 100%;
 		border-radius: 8px;
 		overflow: hidden;
-		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		border: 1px solid var(--shadow-color);
+		line-height: 0;
 	}
 
-	.publication-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-
-	.publication-image {
+	/* Height follows the image's own aspect ratio, so no grey letterboxing shows */
+	.pub-thumb img {
 		width: 100%;
+		height: auto;
+		display: block;
+		transition: transform 0.3s ease;
+	}
+
+	a.pub-thumb:hover img {
+		transform: scale(1.04);
+	}
+
+	/* Placeholder (papers without an image) keeps a fixed 16:9 frame */
+	.pub-thumb .placeholder-image {
 		aspect-ratio: 16 / 9;
-		overflow: hidden;
-		background: var(--block-color);
-		position: relative;
-	}
-
-	.publication-image img {
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
 	}
 
 	.placeholder-image {
@@ -288,26 +339,50 @@ const areas = [...knownAreas, ...extraAreas];
 		color: var(--secondary-color);
 	}
 
-	.publication-content {
-		padding: 1.25rem;
+	.pub-body {
+		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		flex-grow: 1;
+		gap: 0.5rem;
+	}
+
+	.pub-venue-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.pub-venue {
+		display: inline-block;
+		max-width: 100%;
+		font-family: var(--monospace);
+		font-size: 0.72rem;
+		letter-spacing: 0.02em;
+		line-height: 1.5;
+		color: #0E8C86;
+		background-color: #DBF1EF;
+		border-radius: 4px;
+		padding: 2px 9px;
+		overflow-wrap: break-word;
 	}
 
 	.publication-title {
-		font-size: 1.1rem;
+		font-size: 1.15rem;
 		font-weight: 600;
 		line-height: 1.4;
 		color: var(--primary-color);
 		margin: 0;
 	}
 
-	.publication-meta {
-		font-size: 0.85rem;
-		color: var(--secondary-color);
-		margin: 0;
+	.publication-title a {
+		color: inherit;
+		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+
+	.publication-title a:hover {
+		color: #0E8C86;
 	}
 
 	.publication-topics {
@@ -334,26 +409,26 @@ const areas = [...knownAreas, ...extraAreas];
 		display: inline-block;
 		padding: 0.15rem 0.5rem;
 		margin-left: 0.5rem;
-		background-color: #ffe5e5;
-		color: #A51C30;
+		background-color: #DBF1EF;
+		color: #0E8C86;
 		font-weight: 600;
 		font-size: 0.85rem;
 		border-radius: 4px;
 	}
 
 	.publication-authors {
-		font-size: 0.85rem;
+		font-size: 0.9rem;
 		color: var(--remark-color);
-		line-height: 1.5;
+		line-height: 1.6;
 		margin: 0;
 	}
 
+	/* Action links sit under the text in the right column */
 	.publication-links {
 		display: flex;
 		gap: 0.75rem;
 		flex-wrap: wrap;
-		margin-top: auto;
-		padding-top: 0.5rem;
+		margin-top: 0.25rem;
 	}
 
 	.pub-link {
@@ -362,7 +437,7 @@ const areas = [...knownAreas, ...extraAreas];
 		gap: 0.4rem;
 		padding: 0.35rem 0.85rem;
 		background: var(--block-color);
-		color: #A51C30;
+		color: #0E8C86;
 		text-decoration: none;
 		border-radius: 4px;
 		font-size: 0.85rem;
@@ -402,18 +477,20 @@ const areas = [...knownAreas, ...extraAreas];
 		}
 	}
 
-	@media (max-width: 768px) {
-		.publications-grid {
-			grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-			gap: 1.5rem;
+	@media (max-width: 640px) {
+		/* Stack thumbnail above text on narrow screens */
+		.publication-card {
+			grid-template-columns: 1fr;
+			gap: 0.85rem;
 		}
 
-		.publication-content {
-			padding: 1rem;
+		.pub-aside {
+			width: 100%;
+			max-width: 420px;
 		}
 
 		.publication-title {
-			font-size: 1rem;
+			font-size: 1.05rem;
 		}
 
 		.filter-label {

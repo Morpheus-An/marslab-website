@@ -17,6 +17,6 @@ image: "/publications/jindou-marspolicy-arxiv26.png"
 paper: "https://arxiv.org/abs/2605.29766"
 website: "https://lorenzo-0-0.github.io/MARS_Policy/"
 tags:
-  - "Manipulation"
+  - "Robot Manipulation"
   - "Efficient AI"
 ---

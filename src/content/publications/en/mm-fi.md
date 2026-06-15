@@ -17,7 +17,7 @@ paper: "https://arxiv.org/pdf/2305.10345"
 website: "https://ntu-aiot-lab.github.io/mm-fi"
 code: "https://github.com/ybhbingo/MMFi_dataset"
 tags:
-  - "Benchmarks"
+  - "Benchmarks & Datasets"
   - "RF Sensing"
-  - "Human Sensing"
+  - "Wireless Human Sensing"
 ---

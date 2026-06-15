@@ -16,6 +16,6 @@ paper: "https://arxiv.org/abs/2605.15492"
 website: "https://b1ue-jay.github.io/FLASH/"
 code: "https://github.com/B1ue-Jay/FLASH"
 tags:
-  - "Manipulation"
+  - "Robot Manipulation"
   - "Efficient AI"
 ---

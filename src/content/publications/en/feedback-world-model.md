@@ -20,5 +20,5 @@ website: "https://lorenzo-0-0.github.io/Feedback_World_Model/"
 code: "https://github.com/Lorenzo-0-0/Feedback_World_Model"
 tags:
   - "World Models"
-  - "Manipulation"
+  - "Robot Manipulation"
 ---

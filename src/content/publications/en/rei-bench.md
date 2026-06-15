@@ -9,5 +9,5 @@ year: 2026
 image: "/publications/chenxi-reibench-arxiv25.png"
 paper: "https://arxiv.org/abs/2505.10872"
 tags:
-  - "Benchmarks"
+  - "Benchmarks & Datasets"
 ---

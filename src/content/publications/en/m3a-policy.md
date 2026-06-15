@@ -13,6 +13,6 @@ year: 2026
 image: "/publications/jiayi-m3a-cvpr26.png"
 paper: "https://arxiv.org/pdf/2512.01446"
 tags:
-  - "Manipulation"
-  - "Benchmarks"
+  - "Robot Manipulation"
+  - "Benchmarks & Datasets"
 ---

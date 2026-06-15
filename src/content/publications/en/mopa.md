@@ -15,5 +15,5 @@ code: "https://github.com/AronCao49/MoPA"
 doi: "10.1109/ICRA57147.2024.10610316"
 tags:
   - "Domain Adaptation"
-  - "Multimodal Learning"
+  - "Multimodal Foundation Models"
 ---

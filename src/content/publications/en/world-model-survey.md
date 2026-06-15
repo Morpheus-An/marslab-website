@@ -27,5 +27,5 @@ website: "https://ntumars.github.io/wm-robot-survey/"
 code: "https://github.com/NTUMARS/Awesome-World-Model-for-Robotics-Policy"
 tags:
   - "World Models"
-  - "Manipulation"
+  - "Robot Manipulation"
 ---
