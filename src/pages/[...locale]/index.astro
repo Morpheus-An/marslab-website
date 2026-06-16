@@ -83,12 +83,11 @@ const NEWS_VISIBLE = 9;
 const newsHead = news.slice(0, NEWS_VISIBLE);
 const newsTail = news.slice(NEWS_VISIBLE);
 
-// ---- Lab highlights / events — horizontal scroller (sourced from Prof. Yang's LinkedIn) ----
-const LINKEDIN = "https://www.linkedin.com/in/jianfei-yang-55560386/recent-activity/all/";
+// ---- Lab highlights / events — horizontal scroller (non-clickable cards) ----
 const events = [
-	{ image: "/events/roboexchange.jpg",      title: "RoboExchange Workshop",          meta: "NTU MARS Lab × NRP",         url: LINKEDIN },
-	{ image: "/events/mae-high-tea.jpg",       title: "MAE High Tea Outreach",          meta: "NTU College of Engineering", url: LINKEDIN },
-	{ image: "/events/supply-chain-2026.jpg",  title: "Robotics Supply-Chain Workshop", meta: "Singapore · 2026",           url: LINKEDIN },
+	{ image: "/events/roboexchange.jpg",      title: "RoboNexus Exchange",             meta: "NTU MARS Lab × NRP" },
+	{ image: "/events/mae-high-tea.jpg",       title: "MAE High Tea",                   meta: "NTU MAE · Student Outreach" },
+	{ image: "/events/supply-chain-2026.jpg",  title: "Robotics Supply-Chain Workshop", meta: "Singapore · 2026" },
 ];
 
 // ---- Collaborating institutions — auto-scrolling logo marquee (logos in public/partners/) ----
@@ -105,6 +104,7 @@ const partners = [
 	{ file: "google.svg",    name: "Google" },
 	{ file: "microsoft.svg", name: "Microsoft" },
 	{ file: "sharpa.svg",    name: "Sharpa" },
+	{ file: "rokae.png",     name: "ROKAE" },
 	{ file: "unitree.svg",   name: "Unitree" },
 ];
 ---
@@ -209,7 +209,6 @@ const partners = [
 			<div class="events-head">
 				<h2 class="events-heading">Highlights</h2>
 				<div class="events-controls">
-					<a class="events-more" href={LINKEDIN} target="_blank" rel="noopener noreferrer">More on LinkedIn ↗</a>
 					<button class="ev-arrow ev-prev" type="button" aria-label="Scroll to previous" disabled>
 						<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
 					</button>
@@ -221,7 +220,7 @@ const partners = [
 
 			<div class="events-scroller">
 				{events.map((e) => (
-					<a class="event-card" href={e.url} target="_blank" rel="noopener noreferrer">
+					<article class="event-card">
 						<div class="event-photo">
 							<img src={`${baseUrl}${e.image.replace(/^\//, '')}`} alt={e.title} loading="lazy" />
 						</div>
@@ -229,7 +228,7 @@ const partners = [
 							<span class="event-meta">{e.meta}</span>
 							<span class="event-title">{e.title}</span>
 						</div>
-					</a>
+					</article>
 				))}
 			</div>
 		</section>
@@ -433,12 +432,6 @@ const partners = [
 	}
 	.events-heading { font-size: 1.6rem; font-weight: 700; margin: 0; line-height: 1.1; }
 	.events-controls { display: flex; align-items: center; gap: 0.7rem; }
-	.events-more {
-		font-size: 0.82rem; font-weight: 500; letter-spacing: 0.01em;
-		color: var(--secondary-color); text-decoration: none; white-space: nowrap;
-		transition: color 0.2s ease;
-	}
-	.events-more:hover { color: var(--accent); }
 	.ev-arrow {
 		display: inline-flex; align-items: center; justify-content: center;
 		width: 34px; height: 34px; flex: 0 0 auto;
@@ -453,7 +446,7 @@ const partners = [
 
 	.events-scroller {
 		display: flex; gap: 1.25rem;
-		overflow-x: auto; scroll-snap-type: x proximity;
+		overflow-x: auto;
 		padding: 0.3rem 0.25rem 1rem; margin: 0 -0.25rem;
 		scrollbar-width: none;
 		-webkit-mask-image: linear-gradient(90deg, #000 0, #000 94%, transparent 100%);
@@ -560,7 +553,6 @@ const partners = [
 		.face-row { height: 78px; }
 		.face { width: 58px; height: 58px; }
 		.event-card { flex-basis: 86%; }
-		.events-more { display: none; }
 	}
 </style>
 
@@ -581,15 +573,19 @@ const partners = [
 		const clamp = (v: number) => Math.max(0, Math.min(v, scroller.scrollWidth - scroller.clientWidth));
 
 		let raf = 0;
-		const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+		// easeInOutCubic — gentle acceleration AND deceleration (no abrupt start/stop).
+		// rAF tween (direct scrollLeft) is used instead of native smooth-scroll because the
+		// latter silently no-ops without user activation; this is reliable + smooth at 60fps.
+		const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 		function animateTo(to: number) {
 			cancelAnimationFrame(raf);
 			const from = scroller!.scrollLeft;
 			const dist = clamp(to) - from;
 			if (Math.abs(dist) < 1) return;
-			const t0 = performance.now();
-			const dur = 420;
+			let t0 = 0;
+			const dur = 600;
 			function frame(now: number) {
+				if (!t0) t0 = now;
 				const t = Math.min(1, (now - t0) / dur);
 				scroller!.scrollLeft = from + dist * ease(t);
 				if (t < 1) raf = requestAnimationFrame(frame);
