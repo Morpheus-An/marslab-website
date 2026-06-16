@@ -212,7 +212,7 @@ const gallery = [
 			</ol>
 
 			<label for="news-toggle" class="news-more-btn">
-				<span class="label-more">Show {newsTail.length} more</span>
+				<span class="label-more">Show more</span>
 				<span class="label-less">Show less</span>
 				<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
 			</label>
@@ -284,7 +284,7 @@ const gallery = [
 		font-size: 0.72rem;
 		letter-spacing: 0.02em;
 		color: #fff;
-		background: linear-gradient(135deg, #A51C30 0%, #8a1728 100%);
+		background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
 		border-radius: 999px;
 		padding: 1px 8px;
 		box-shadow: 0 1px 4px rgba(42, 42, 40, 0.24);
@@ -336,8 +336,8 @@ const gallery = [
 	}
 	.sun-halo {
 		position: absolute; inset: -9px; border-radius: 50%;
-		border: 1.5px solid rgba(165, 28, 48, 0.32);
-		box-shadow: 0 0 0 7px rgba(165, 28, 48, 0.045);
+		border: 1.5px solid rgba(180, 83, 9, 0.36);
+		box-shadow: 0 0 0 7px rgba(180, 83, 9, 0.06);
 		pointer-events: none;
 	}
 	.sun:hover img { box-shadow: 0 9px 26px rgba(42, 42, 40, 0.28); }
@@ -406,7 +406,7 @@ const gallery = [
 	.planet:hover img,
 	.planet:focus-visible img {
 		transform: scale(1.55);
-		border: 1.5px solid #A51C30;
+		border: 1.5px solid var(--accent);
 		box-shadow: 0 8px 22px rgba(42, 42, 40, 0.30);
 	}
 	.planet:hover .planet-label,
@@ -433,14 +433,14 @@ const gallery = [
 	}
 	.news-month { font-weight: 700; font-size: 0.9rem; color: var(--primary-color); white-space: nowrap; }
 	.news-body { font-size: 0.93rem; line-height: 1.55; color: var(--secondary-color); }
+	/* Venue is plain emphasis text — no badge box; KaTeX (Computer Modern) for a LaTeX/math feel,
+	   bold amber for key venues (CVPR, RSS 2026…) */
 	.news-venue {
-		display: inline-block; margin-left: 0.45rem;
-		font-family: var(--monospace); font-size: 0.66rem; letter-spacing: 0.03em;
-		vertical-align: 0.07em;
-		color: #A51C30;
-		background: rgba(165, 28, 48, 0.07);
-		border: 1px solid rgba(165, 28, 48, 0.26);
-		border-radius: 4px; padding: 1px 6px;
+		margin-left: 0.45rem;
+		font-family: "KaTeX_Main", var(--serif); font-size: 0.95rem; letter-spacing: 0;
+		color: var(--accent);
+		font-weight: 700;
+		background: none; border: none; padding: 0;
 	}
 
 	.news-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
@@ -449,23 +449,28 @@ const gallery = [
 
 	.news-more-btn {
 		align-self: center;
-		display: inline-flex; align-items: center; gap: 0.45rem;
-		margin-top: 1.1rem; padding: 0.45rem 1.15rem;
-		font-size: 0.85rem; color: var(--primary-color);
-		background: var(--background-color);
+		display: inline-flex; align-items: center; gap: 0.5rem;
+		margin-top: 1.3rem; padding: 0.55rem 1.4rem;
+		font-size: 0.82rem; font-weight: 500; letter-spacing: 0.03em;
+		color: var(--secondary-color);
+		background: linear-gradient(180deg, var(--background-color) 0%, var(--block-color) 100%);
 		border: 1px solid var(--shadow-color);
-		border-radius: 8px;
-		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.07);
+		border-radius: 999px;
+		box-shadow: 0 1px 2px rgba(42, 42, 40, 0.05);
 		cursor: pointer; user-select: none;
-		transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+		transition: border-color 0.22s ease, color 0.22s ease, box-shadow 0.25s ease, transform 0.22s ease;
 	}
-	.news-more-btn:hover { border-color: #A51C30; color: #A51C30; box-shadow: 0 5px 13px rgba(42, 42, 40, 0.12); }
-	.chev { width: 14px; height: 14px; transition: transform 0.3s ease; }
+	.news-more-btn:hover {
+		border-color: var(--accent); color: var(--accent);
+		box-shadow: 0 6px 16px rgba(42, 42, 40, 0.10);
+		transform: translateY(-1px);
+	}
+	.chev { width: 14px; height: 14px; transition: transform 0.32s ease; }
 	.label-less { display: none; }
 	.news-toggle:checked ~ .news-more-btn .label-more { display: none; }
 	.news-toggle:checked ~ .news-more-btn .label-less { display: inline; }
 	.news-toggle:checked ~ .news-more-btn .chev { transform: rotate(180deg); }
-	.news-toggle:focus-visible ~ .news-more-btn { outline: 2px solid #A51C30; outline-offset: 2px; }
+	.news-toggle:focus-visible ~ .news-more-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 	/* ===================== GALLERY ===================== */
 	.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }

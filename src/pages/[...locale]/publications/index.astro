@@ -82,6 +82,33 @@ const areas = [...knownAreas, ...extraAreas];
 		<h1 class="text-3xl font-bold mb-8">Publications</h1>
 
 		<div class="publications-container">
+			<!-- Filter bar across the top (relocated from the former right sidebar) -->
+			<aside class="publications-filters">
+				<section class="filter-section">
+					<h3>Research Area</h3>
+					<div class="filter-group filter-chips">
+						{areas.map((area) => (
+							<label class="filter-label">
+								<input type="checkbox" class="filter-checkbox area-filter" data-value={area} />
+								<span>{area}</span>
+							</label>
+						))}
+					</div>
+				</section>
+
+				<section class="filter-section">
+					<h3>Year</h3>
+					<div class="filter-group filter-chips">
+						{years.map((year) => (
+							<label class="filter-label">
+								<input type="checkbox" class="filter-checkbox year-filter" data-value={year} />
+								<span>{year}</span>
+							</label>
+						))}
+					</div>
+				</section>
+			</aside>
+
 			<!-- Publications list: one row per paper -->
 			<div class="publications-main">
 				<div class="publications-grid">
@@ -153,115 +180,92 @@ const areas = [...knownAreas, ...extraAreas];
 				</div>
 			</div>
 
-			<!-- Sidebar on the right -->
-			<aside class="publications-sidebar">
-				<section class="filter-section">
-					<h3>Research Area</h3>
-					<div class="filter-group filter-scrollable">
-						{areas.map((area) => (
-							<label class="filter-label">
-								<input type="checkbox" class="filter-checkbox area-filter" data-value={area} />
-								<span>{area}</span>
-							</label>
-						))}
-					</div>
-				</section>
-
-				<section class="filter-section">
-					<h3>Year</h3>
-					<div class="filter-group filter-scrollable">
-						{years.map((year) => (
-							<label class="filter-label">
-								<input type="checkbox" class="filter-checkbox year-filter" data-value={year} />
-								<span>{year}</span>
-							</label>
-						))}
-					</div>
-				</section>
-			</aside>
 		</div>
 	</main>
 </Base>
 
 <style>
 	.publications-container {
-		display: grid;
-		grid-template-columns: 1fr 200px;
-		gap: 3rem;
+		display: flex;
+		flex-direction: column;
+		gap: 2.5rem;
 		width: 100%;
 	}
 
-	/* Sidebar Styles - Clean and minimal */
-	.publications-sidebar {
-		position: sticky;
-		top: 1rem;
-		height: fit-content;
+	/* Filter toolbar across the top — flat editorial panel, square corners, hairline divider */
+	.publications-filters {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: stretch;
+		gap: 1.4rem 0;
+		padding: 1.5rem 1.6rem;
+		border: 1px solid var(--shadow-color);
+		border-radius: 0;
+		background: var(--background-color);
 	}
 
 	.filter-section {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
-		margin-bottom: 1.5rem;
+		gap: 0.85rem;
+		margin: 0;
 	}
+
+	/* Research Area takes the flexible width; Year sits beside it past a hairline divider */
+	.filter-section:first-child { flex: 1 1 440px; padding-right: 2.4rem; }
+	.filter-section:last-child  { flex: 0 1 auto; padding-left: 2.4rem; border-left: 1px solid var(--shadow-color); }
 
 	.filter-section h3 {
-		font-size: 1rem;
-		font-weight: 600;
-		color: var(--primary-color);
-		margin: 0 0 0.25rem 0;
+		font-size: 0.64rem;
+		font-weight: 700;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--weak-color);
+		margin: 0;
 	}
 
-	.filter-group {
+	.filter-chips {
 		display: flex;
-		flex-direction: column !important;
-		gap: 0.4rem;
-		width: 100%;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: 0.45rem;
 	}
 
-	.filter-scrollable {
-		max-height: 250px;
-		overflow-y: auto;
-		overflow-x: hidden;
-		padding-right: 0.5rem;
-	}
-
+	/* Soft filled chips with a small radius that echoes the square panel. The native
+	   checkbox is visually hidden but kept in the DOM so Base.astro's filter logic works. */
 	.filter-label {
-		display: flex !important;
-		flex-direction: row !important;
+		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
 		cursor: pointer;
-		font-size: 0.875rem;
+		font-size: 0.8rem;
+		line-height: 1.2;
 		color: var(--secondary-color);
 		user-select: none;
-		padding: 0.15rem 0;
-		width: 100%;
-	}
-
-	.filter-label:hover {
-		color: var(--primary-color);
-	}
-
-	.filter-label span {
-		flex: 1;
-		text-decoration: underline;
-		text-decoration-color: transparent;
-		text-underline-offset: 2px;
-		transition: text-decoration-color 0.15s ease;
-	}
-
-	.filter-label:hover span {
-		text-decoration-color: var(--primary-color);
+		padding: 0.38rem 0.85rem;
+		border-radius: 5px;
+		background: var(--block-color);
+		transition: color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 	}
 
 	.filter-checkbox {
-		cursor: pointer;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		opacity: 0;
 		margin: 0;
-		width: 14px;
-		height: 14px;
-		flex-shrink: 0;
-		accent-color: var(--primary-color);
+		pointer-events: none;
+	}
+
+	.filter-label:hover {
+		color: var(--accent);
+		background: var(--accent-soft);
+	}
+
+	.filter-label:has(.filter-checkbox:checked) {
+		color: #fffdfb;
+		background: var(--accent);
+		font-weight: 600;
+		box-shadow: 0 1px 4px rgba(180, 83, 9, 0.30);
 	}
 
 	/* Publications list — one row per paper */
@@ -360,8 +364,9 @@ const areas = [...knownAreas, ...extraAreas];
 		font-size: 0.72rem;
 		letter-spacing: 0.02em;
 		line-height: 1.5;
-		color: #0E8C86;
-		background-color: #DBF1EF;
+		color: var(--accent);
+		background-color: var(--accent-soft);
+		border: 1px solid rgba(180, 83, 9, 0.22);
 		border-radius: 4px;
 		padding: 2px 9px;
 		overflow-wrap: break-word;
@@ -382,7 +387,7 @@ const areas = [...knownAreas, ...extraAreas];
 	}
 
 	.publication-title a:hover {
-		color: #0E8C86;
+		color: var(--accent);
 	}
 
 	.publication-topics {
@@ -409,8 +414,8 @@ const areas = [...knownAreas, ...extraAreas];
 		display: inline-block;
 		padding: 0.15rem 0.5rem;
 		margin-left: 0.5rem;
-		background-color: #DBF1EF;
-		color: #0E8C86;
+		background-color: var(--accent-soft);
+		color: var(--accent);
 		font-weight: 600;
 		font-size: 0.85rem;
 		border-radius: 4px;
@@ -437,17 +442,18 @@ const areas = [...knownAreas, ...extraAreas];
 		gap: 0.4rem;
 		padding: 0.35rem 0.85rem;
 		background: var(--block-color);
-		color: #0E8C86;
+		color: var(--accent);
 		text-decoration: none;
 		border-radius: 4px;
 		font-size: 0.85rem;
 		font-weight: 500;
-		transition: background 0.2s ease, transform 0.1s ease;
+		transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
 	}
 
 	.pub-link:hover {
-		background: var(--shadow-color);
-		transform: scale(1.05);
+		background: var(--accent-soft);
+		box-shadow: 0 2px 8px rgba(180, 83, 9, 0.15);
+		transform: translateY(-1px);
 	}
 
 	.pub-link figure {
@@ -456,25 +462,14 @@ const areas = [...knownAreas, ...extraAreas];
 	}
 
 	/* Mobile Responsive */
-	@media (max-width: 1024px) {
-		.publications-container {
-			grid-template-columns: 1fr;
+	/* Stack the two filter sections on narrower screens — drop the vertical divider */
+	@media (max-width: 760px) {
+		.publications-filters {
+			flex-direction: column;
+			gap: 1.3rem;
 		}
-
-		.publications-sidebar {
-			position: relative;
-			top: 0;
-			order: -1;
-			margin-bottom: 2rem;
-		}
-
-		.filter-section {
-			margin-bottom: 1.5rem;
-		}
-
-		.filter-scrollable {
-			max-height: 150px;
-		}
+		.filter-section:first-child { padding-right: 0; }
+		.filter-section:last-child { padding-left: 0; border-left: none; }
 	}
 
 	@media (max-width: 640px) {

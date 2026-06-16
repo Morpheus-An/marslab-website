@@ -30,9 +30,9 @@ const socialLinks = (p: any) => [
 
 // Group members into role sections (each person lands in exactly one)
 const sectionDefs = [
-	{ title: "Postdoctoral Researchers", match: (p: any) => p.position === "Postdoc" },
+	{ title: "Postdocs", match: (p: any) => p.position === "Postdoc" },
 	{ title: "PhD Students", match: (p: any) => p.position.startsWith("PhD") },
-	{ title: "Master's Students", match: (p: any) => /MEng|Master/.test(p.position) },
+	{ title: "MEng Students", match: (p: any) => /MEng|Master/.test(p.position) },
 	{ title: "Research Assistants", match: (p: any) => p.position === "Research Assistant" },
 ];
 
@@ -141,7 +141,7 @@ if (others.length) sections.push({ title: "Team", members: others });
 		color: var(--primary-color);
 		margin: 0 0 1.5rem 0;
 		padding-bottom: 0.4rem;
-		border-bottom: 2px solid #0E8C86;
+		border-bottom: 2px solid var(--accent);
 		display: inline-block;
 	}
 
@@ -227,11 +227,6 @@ if (others.length) sections.push({ title: "Team", members: others });
 		height: 100%;
 		object-fit: cover;
 		display: block;
-		transition: transform 0.3s ease;
-	}
-
-	.person:hover .person-photo img {
-		transform: scale(1.04);
 	}
 
 	.photo-placeholder {
@@ -276,14 +271,14 @@ if (others.length) sections.push({ title: "Team", members: others });
 		width: 30px;
 		height: 30px;
 		background: var(--block-color);
-		color: #0E8C86;
+		color: var(--accent);
 		border-radius: 6px;
 		text-decoration: none;
 		transition: background 0.2s ease, transform 0.1s ease;
 	}
 
 	.person-link:hover {
-		background: #DBF1EF;
+		background: var(--accent-soft);
 		transform: translateY(-2px);
 	}
 
@@ -310,7 +305,7 @@ if (others.length) sections.push({ title: "Team", members: others });
 		color: var(--primary-color);
 		margin: 0 0 0.75rem 0;
 		padding-bottom: 0.4rem;
-		border-bottom: 2px solid #0E8C86;
+		border-bottom: 2px solid var(--accent);
 		display: inline-block;
 	}
 

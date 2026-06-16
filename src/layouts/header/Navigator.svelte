@@ -124,11 +124,15 @@
 		// Set up route tracking for page navigation with Swup integration
 		const update_route = () => (route = window.location.pathname);
 		if (window.swup) {
-			// Register route update hook if Swup is already available
-			window.swup.hooks.on("page:load", update_route);
+			// Register route update hook if Swup is already available.
+			// Use page:view (fires after content replace + history/URL update, on every
+			// actual visit incl. back/forward) — not page:load, which fires during fetch/
+			// preload when window.location is stale and skips cached navigations, leaving
+			// the active underline stuck on the previous page.
+			window.swup.hooks.on("page:view", update_route);
 		} else {
 			// Wait for Swup to be enabled and then register the hook
-			document.addEventListener("swup:enable", () => window.swup?.hooks.on("page:load", update_route));
+			document.addEventListener("swup:enable", () => window.swup?.hooks.on("page:view", update_route));
 		}
 	});
 </script>
