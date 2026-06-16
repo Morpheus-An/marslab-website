@@ -145,8 +145,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 		<div id="body" class="flex flex-col min-h-screen">
 			<header class="sticky top-0 flex items-center justify-between pt-3 pb-1 mb-4 bg-background z-2 sm:(static pb-12)">
 				<a href={getRelativeLocaleUrl(locale)} class="text-size-xl sm:text-size-3xl font-bold">
-					<img src={`${baseUrl}mars_lab_logo_black.png`} alt={title} class="site-logo site-logo-light h-8 sm:h-10" />
-					<img src={`${baseUrl}mars_lab_logo_white.png`} alt={title} class="site-logo site-logo-dark h-8 sm:h-10" />
+					<img src={`${baseUrl}mars_lab_logo_black.png`} alt={title} class="site-logo site-logo-light h-10 sm:h-12" />
+					<img src={`${baseUrl}mars_lab_logo_white.png`} alt={title} class="site-logo site-logo-dark h-10 sm:h-12" />
 				</a>
 
 				<Navigator {locale} {route} {baseUrl} client:load>
