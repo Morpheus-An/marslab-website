@@ -1,0 +1,225 @@
+---
+import { i18n } from "astro:config/client";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Base from "$layouts/Base.astro";
+import i18nit from "$i18n";
+import { people } from "$data/people";
+
+export async function getStaticPaths() {
+	return i18n!.locales.map(locale => ({ params: { locale: locale == i18n?.defaultLocale ? undefined : (locale as string) } }));
+}
+
+const { locale = i18n!.defaultLocale } = Astro.params;
+const t = i18nit(locale);
+const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+// Anchor ids must match the People page exactly
+const slugify = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
+const peopleWithImages = people.filter(person => person.image);
+
+// PI = sun (center), everyone else = planets on 3 orbits
+const pi = peopleWithImages[0];
+const orbiters = peopleWithImages.slice(1);
+const RING_CAPACITY = [5, 7, 9];
+const ringBuckets: any[][] = RING_CAPACITY.map(() => []);
+orbiters.forEach((person, i) => {
+	let r = 0, n = i;
+	while (r < RING_CAPACITY.length - 1 && n >= RING_CAPACITY[r]) { n -= RING_CAPACITY[r]; r++; }
+	ringBuckets[r].push(person);
+});
+// Uniform avatar size across all rings — equal presence + consistent hover
+const RING_CONFIG = [
+	{ radius: 120, size: 56, duration: 90,  reverse: false, startAngle: 8 },
+	{ radius: 182, size: 56, duration: 116, reverse: true,  startAngle: 26 },
+	{ radius: 240, size: 56, duration: 142, reverse: false, startAngle: 16 },
+];
+const constellation = ringBuckets.map((members, ri) => {
+	const cfg = RING_CONFIG[ri];
+	const step = 360 / Math.max(members.length, 1);
+	return {
+		...cfg,
+		members: members.map((person, mi) => ({ person, id: slugify(person.name), angle: cfg.startAngle + mi * step })),
+	};
+});
+---
+
+<Base title="The MARS Lab" {locale}>
+	<main class="constellation-page">
+		<header class="cp-head">
+			<h1 class="cp-title">The MARS Lab</h1>
+			<p class="cp-sub">Prof. Jianfei Yang and the people who orbit the lab — hover a face to meet them.</p>
+		</header>
+
+		<div class="constellation-wrap">
+			<div class="constellation" role="img" aria-label="MARS Lab members orbiting Prof. Jianfei Yang">
+				{RING_CONFIG.map((cfg) => (
+					<span class="orbit-ring" style={`--d:${cfg.radius * 2}px`} aria-hidden="true"></span>
+				))}
+
+				<a href={getRelativeLocaleUrl(locale, `/people#${slugify(pi.name)}`)} class="sun" title={pi.name}>
+					<span class="sun-halo" aria-hidden="true"></span>
+					<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="eager" width="128" height="128" />
+					<span class="planet-label sun-label">{pi.name}</span>
+				</a>
+
+				{constellation.map((ring) => (
+					<div class:list={["orbit", { "orbit--rev": ring.reverse }]} style={`--dur:${ring.duration}s`}>
+						{ring.members.map((m) => (
+							<a
+								class="planet"
+								href={getRelativeLocaleUrl(locale, `/people#${m.id}`)}
+								title={m.person.name}
+								style={`--angle:${m.angle}deg; --radius:${ring.radius}px; --size:${ring.size}px; --dur:${ring.duration}s`}
+							>
+								<span class="planet-spin">
+									<img src={`${baseUrl}${m.person.image.replace(/^\//, '')}`} alt={m.person.name} loading="lazy" width={ring.size} height={ring.size} />
+									<span class="planet-label">{m.person.name}</span>
+								</span>
+							</a>
+						))}
+					</div>
+				))}
+			</div>
+		</div>
+	</main>
+</Base>
+
+<style>
+	.constellation-page {
+		display: flex; flex-direction: column; align-items: center; justify-content: center;
+		gap: 2.2rem; min-height: 72vh; padding: 1.5rem 0 3rem;
+	}
+	.cp-head { text-align: center; display: flex; flex-direction: column; gap: 0.5rem; }
+	.cp-title { font-size: 2rem; font-weight: 700; letter-spacing: 0.01em; }
+	.cp-sub { font-size: 0.95rem; color: var(--secondary-color); max-width: 46ch; margin: 0 auto; line-height: 1.6; }
+
+	/* ===================== ORBITAL CONSTELLATION ===================== */
+	.constellation-wrap { position: relative; width: 540px; height: 540px; flex: 0 0 auto; }
+	/* faint warm glow behind the system — depth, not a flat graphic */
+	.constellation-wrap::before {
+		content: ""; position: absolute; inset: 5%;
+		border-radius: 50%;
+		background: radial-gradient(circle at 50% 47%, rgba(180, 83, 9, 0.06) 0%, rgba(180, 83, 9, 0) 60%);
+		pointer-events: none; z-index: 0;
+	}
+	.constellation { position: absolute; top: 0; left: 0; width: 540px; height: 540px; transform-origin: top left; z-index: 1; }
+
+	.orbit-ring {
+		position: absolute; top: 50%; left: 50%;
+		width: var(--d); height: var(--d);
+		border: 1px solid var(--shadow-color);
+		border-radius: 50%;
+		transform: translate(-50%, -50%);
+		opacity: 0.4;
+		pointer-events: none;
+	}
+
+	/* sun (PI) */
+	.sun {
+		position: absolute; top: 50%; left: 50%;
+		width: 128px; height: 128px; margin: -64px 0 0 -64px;
+		border-radius: 50%; z-index: 30; display: block;
+	}
+	.sun img {
+		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+		border: 3px solid var(--background-color);
+		box-shadow: 0 6px 20px rgba(42, 42, 40, 0.20), 0 0 0 1px rgba(42, 42, 40, 0.06);
+		position: relative; z-index: 1;
+		transition: box-shadow 0.3s ease;
+	}
+	.sun-halo {
+		position: absolute; inset: -8px; border-radius: 50%;
+		border: 1px solid rgba(180, 83, 9, 0.30);
+		box-shadow: 0 0 0 6px rgba(180, 83, 9, 0.05);
+		pointer-events: none;
+	}
+	.sun:hover img { box-shadow: 0 10px 28px rgba(42, 42, 40, 0.28), 0 0 0 1px rgba(42, 42, 40, 0.06); }
+
+	/* orbit ring container — slow drift */
+	.orbit { position: absolute; inset: 0; animation: orbit-spin var(--dur) linear infinite; z-index: 20; }
+	.orbit--rev { animation-direction: reverse; }
+
+	.planet {
+		position: absolute; top: 50%; left: 50%;
+		width: var(--size); height: var(--size);
+		margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+		transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius)));
+	}
+	/* counter-spin keeps faces upright */
+	.planet-spin {
+		display: block; width: 100%; height: 100%;
+		animation: planet-upright var(--dur) linear infinite;
+		transform-origin: center center;
+	}
+	.orbit--rev .planet-spin { animation-direction: reverse; }
+
+	.planet img {
+		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+		border: 2px solid var(--background-color);
+		box-shadow: 0 2px 9px rgba(42, 42, 40, 0.14), 0 0 0 1px rgba(42, 42, 40, 0.05);
+		background: var(--block-color);
+		transition: box-shadow 0.3s ease, transform 0.35s cubic-bezier(0.22, 0.68, 0.28, 1);
+	}
+
+	.planet-label {
+		position: absolute; left: 50%; top: calc(100% + 7px);
+		transform: translateX(-50%);
+		white-space: nowrap;
+		font-family: var(--serif); font-size: 0.72rem;
+		color: var(--primary-color);
+		background: var(--background-color);
+		border: 1px solid var(--shadow-color);
+		border-radius: 5px; padding: 1px 7px;
+		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.12);
+		opacity: 0; pointer-events: none;
+		transition: opacity 0.2s ease;
+		z-index: 6;
+	}
+	.sun-label { font-size: 0.84rem; font-weight: 700; top: calc(100% + 11px); }
+
+	@keyframes orbit-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+	@keyframes planet-upright {
+		from { transform: rotate(calc(-1 * var(--angle))); }
+		to   { transform: rotate(calc(-1 * var(--angle) - 360deg)); }
+	}
+
+	/* hover: pause the drift only when over an avatar, dim the rest, lift the chosen one */
+	.constellation:has(.planet:hover) .orbit,
+	.constellation:has(.planet:hover) .planet-spin,
+	.constellation:focus-within .orbit,
+	.constellation:focus-within .planet-spin { animation-play-state: paused; }
+
+	.constellation:has(.planet:hover) .planet,
+	.constellation:focus-within .planet { opacity: 0.35; transition: opacity 0.3s ease; }
+	.constellation:has(.planet:hover) .planet:hover,
+	.constellation:focus-within .planet:focus-visible { opacity: 1; z-index: 40; }
+
+	.planet:hover img,
+	.planet:focus-visible img {
+		transform: scale(1.22);
+		box-shadow: 0 10px 26px rgba(42, 42, 40, 0.24), 0 0 0 2px var(--accent);
+	}
+	.planet:hover .planet-label,
+	.planet:focus-visible .planet-label,
+	.sun:hover .planet-label,
+	.sun:focus-visible .planet-label { opacity: 1; }
+
+	@media (prefers-reduced-motion: reduce) {
+		.orbit, .planet-spin { animation: none !important; }
+	}
+
+	/* responsive scaling */
+	@media (max-width: 1000px) {
+		.constellation-wrap { width: 432px; height: 432px; }
+		.constellation { transform: scale(0.8); }
+	}
+	@media (max-width: 768px) {
+		.constellation-wrap { width: 356px; height: 356px; }
+		.constellation { transform: scale(0.66); }
+		.cp-title { font-size: 1.6rem; }
+	}
+	@media (max-width: 480px) {
+		.constellation-wrap { width: 281px; height: 281px; }
+		.constellation { transform: scale(0.52); }
+	}
+</style>

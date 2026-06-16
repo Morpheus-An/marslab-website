@@ -34,28 +34,14 @@ const slugify = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
 
 const peopleWithImages = people.filter(person => person.image);
 
-// ---- Constellation placement: PI = sun (center), others = planets on 3 orbits ----
-const pi = peopleWithImages[0];
-const orbiters = peopleWithImages.slice(1);
-const RING_CAPACITY = [5, 7, 9];
-const ringBuckets: any[][] = RING_CAPACITY.map(() => []);
-orbiters.forEach((person, i) => {
-	let r = 0, n = i;
-	while (r < RING_CAPACITY.length - 1 && n >= RING_CAPACITY[r]) { n -= RING_CAPACITY[r]; r++; }
-	ringBuckets[r].push(person);
-});
-const RING_CONFIG = [
-	{ radius: 116, size: 64, duration: 74,  reverse: false, startAngle: 8 },
-	{ radius: 182, size: 52, duration: 98,  reverse: true,  startAngle: 30 },
-	{ radius: 242, size: 44, duration: 124, reverse: false, startAngle: 16 },
-];
-const constellation = ringBuckets.map((members, ri) => {
-	const cfg = RING_CONFIG[ri];
-	const step = 360 / Math.max(members.length, 1);
-	return {
-		...cfg,
-		members: members.map((person, mi) => ({ person, id: slugify(person.name), angle: cfg.startAngle + mi * step })),
-	};
+// ---- Member face marquee (home hero centre): horizontal rows, adjacent rows scroll opposite ----
+// (The rotating constellation now lives on its own /constellation page, opened from the logo.)
+const FACE_ROWS = 4;
+// Each row holds every member, rotated so adjacent rows don't line up; the markup
+// duplicates each row once so the scroll loops seamlessly.
+const faceRows = Array.from({ length: FACE_ROWS }, (_, r) => {
+	const offset = Math.round((peopleWithImages.length / FACE_ROWS) * r);
+	return [...peopleWithImages.slice(offset), ...peopleWithImages.slice(0, offset)];
 });
 
 // ---- Robotic platforms (side vertical marquee) ----
@@ -97,11 +83,29 @@ const NEWS_VISIBLE = 9;
 const newsHead = news.slice(0, NEWS_VISIBLE);
 const newsTail = news.slice(NEWS_VISIBLE);
 
-// Lab & campus photos (kept from existing design)
-const gallery = [
-	{ image: "/gallery/lab-room.png", caption: "Our Lab" },
-	{ image: "/gallery/lab-platforms.jpg", caption: "Robotic Platforms" },
-	{ image: "/gallery/ntu-campus.jpg", caption: "NTU, Singapore" },
+// ---- Lab highlights / events — horizontal scroller (sourced from Prof. Yang's LinkedIn) ----
+const LINKEDIN = "https://www.linkedin.com/in/jianfei-yang-55560386/recent-activity/all/";
+const events = [
+	{ image: "/events/roboexchange.jpg",      title: "RoboExchange Workshop",          meta: "NTU MARS Lab × NRP",         url: LINKEDIN },
+	{ image: "/events/mae-high-tea.jpg",       title: "MAE High Tea Outreach",          meta: "NTU College of Engineering", url: LINKEDIN },
+	{ image: "/events/supply-chain-2026.jpg",  title: "Robotics Supply-Chain Workshop", meta: "Singapore · 2026",           url: LINKEDIN },
+];
+
+// ---- Collaborating institutions — auto-scrolling logo marquee (logos in public/partners/) ----
+// Detailed crests rasterized to small color PNGs (svg seals were 100–470KB → slow); wordmarks stay svg.
+const partners = [
+	{ file: "stanford.png",  name: "Stanford University" },
+	{ file: "berkeley.png",  name: "UC Berkeley" },
+	{ file: "harvard.png",   name: "Harvard University" },
+	{ file: "mit.svg",       name: "MIT" },
+	{ file: "eth.svg",       name: "ETH Zürich" },
+	{ file: "oxford.png",    name: "University of Oxford" },
+	{ file: "princeton.png", name: "Princeton University" },
+	{ file: "nvidia.svg",    name: "NVIDIA" },
+	{ file: "google.svg",    name: "Google" },
+	{ file: "microsoft.svg", name: "Microsoft" },
+	{ file: "sharpa.svg",    name: "Sharpa" },
+	{ file: "unitree.svg",   name: "Unitree" },
 ];
 ---
 
@@ -127,36 +131,18 @@ const gallery = [
 			</div>
 
 			<div class="showcase-center">
-				<div class="constellation-wrap">
-					<div class="constellation" role="img" aria-label="MARS Lab members orbiting Prof. Jianfei Yang">
-						{RING_CONFIG.map((cfg) => (
-							<span class="orbit-ring" style={`--d:${cfg.radius * 2}px`} aria-hidden="true"></span>
-						))}
-
-						<a href={getRelativeLocaleUrl(locale, `/people#${slugify(pi.name)}`)} class="sun" title={pi.name}>
-							<span class="sun-halo" aria-hidden="true"></span>
-							<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="eager" width="128" height="128" />
-							<span class="planet-label sun-label">{pi.name}</span>
-						</a>
-
-						{constellation.map((ring) => (
-							<div class:list={["orbit", { "orbit--rev": ring.reverse }]} style={`--dur:${ring.duration}s`}>
-								{ring.members.map((m) => (
-									<a
-										class="planet"
-										href={getRelativeLocaleUrl(locale, `/people#${m.id}`)}
-										title={m.person.name}
-										style={`--angle:${m.angle}deg; --radius:${ring.radius}px; --size:${ring.size}px; --dur:${ring.duration}s`}
-									>
-										<span class="planet-spin">
-											<img src={`${baseUrl}${m.person.image.replace(/^\//, '')}`} alt={m.person.name} loading="lazy" width={ring.size} height={ring.size} />
-											<span class="planet-label">{m.person.name}</span>
-										</span>
+				<div class="face-marquee" role="img" aria-label="MARS Lab members">
+					{faceRows.map((row, ri) => (
+						<div class="face-row">
+							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${88 + ri * 12}s`}>
+								{[...row, ...row].map((person) => (
+									<a class="face" href={getRelativeLocaleUrl(locale, `/people#${slugify(person.name)}`)} title={person.name} aria-label={person.name}>
+										<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="eager" decoding="async" width="80" height="80" />
 									</a>
 								))}
 							</div>
-						))}
-					</div>
+						</div>
+					))}
 				</div>
 			</div>
 
@@ -218,14 +204,51 @@ const gallery = [
 			</label>
 		</section>
 
-		<!-- Lab & campus photo gallery -->
-		<section class="gallery" aria-label="MARS Lab and NTU campus">
-			{gallery.map((g) => (
-				<figure class="gallery-item">
-					<img src={`${baseUrl}${g.image.replace(/^\//, '')}`} alt={g.caption} loading="lazy" />
-					<figcaption>{g.caption}</figcaption>
-				</figure>
-			))}
+		<!-- Highlights — horizontal-scrolling event cards (Prof. Yang's LinkedIn) -->
+		<section class="events-section" aria-label="Lab highlights">
+			<div class="events-head">
+				<h2 class="events-heading">Highlights</h2>
+				<div class="events-controls">
+					<a class="events-more" href={LINKEDIN} target="_blank" rel="noopener noreferrer">More on LinkedIn ↗</a>
+					<button class="ev-arrow ev-prev" type="button" aria-label="Scroll to previous" disabled>
+						<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+					<button class="ev-arrow ev-next" type="button" aria-label="Scroll to next">
+						<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</button>
+				</div>
+			</div>
+
+			<div class="events-scroller">
+				{events.map((e) => (
+					<a class="event-card" href={e.url} target="_blank" rel="noopener noreferrer">
+						<div class="event-photo">
+							<img src={`${baseUrl}${e.image.replace(/^\//, '')}`} alt={e.title} loading="lazy" />
+						</div>
+						<div class="event-caption">
+							<span class="event-meta">{e.meta}</span>
+							<span class="event-title">{e.title}</span>
+						</div>
+					</a>
+				))}
+			</div>
+		</section>
+
+		<!-- Collaborators — auto-scrolling logo marquee -->
+		<section class="partners-section" aria-label="Collaborating institutions">
+			<h2 class="partners-heading">Collaborators</h2>
+			<div class="partners-marquee">
+				<div class="partners-track">
+					{[...partners, ...partners].map((p) => (
+						<div class="partner" title={p.name}>
+							<div class="partner-logo">
+								<img src={`${baseUrl}partners/${p.file}`} alt={p.name} loading="eager" decoding="async" />
+							</div>
+							<span class="partner-name">{p.name}</span>
+						</div>
+					))}
+				</div>
+			</div>
 		</section>
 	</main>
 </Base>
@@ -305,117 +328,47 @@ const gallery = [
 	@keyframes v-up   { from { transform: translateY(0); }    to { transform: translateY(-50%); } }
 	@keyframes v-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
 
-	/* --- center: orbital constellation --- */
+	/* --- center: member face marquee (horizontal rows, adjacent rows scroll opposite) --- */
 	.showcase-center { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; }
 
-	.constellation-wrap { position: relative; width: 540px; height: 540px; flex: 0 0 auto; }
-	.constellation { position: absolute; top: 0; left: 0; width: 540px; height: 540px; transform-origin: top left; }
+	.face-marquee {
+		display: flex; flex-direction: column; justify-content: center;
+		gap: 6px; width: 100%; height: 100%;
+		/* fade the rows out toward the left/right edges */
+		-webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+		        mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+	}
+	/* taller than the avatar so the hover lift never gets clipped */
+	.face-row { display: flex; align-items: center; height: 104px; overflow: hidden; }
+	.face-track {
+		display: flex; gap: 20px; width: max-content;
+		animation: face-left var(--dur) linear infinite;
+		will-change: transform;
+	}
+	.face-track--rev { animation-name: face-right; }
+	.face-row:hover .face-track { animation-play-state: paused; }
 
-	.orbit-ring {
-		position: absolute; top: 50%; left: 50%;
-		width: var(--d); height: var(--d);
-		border: 1px solid var(--shadow-color);
-		border-radius: 50%;
-		transform: translate(-50%, -50%);
-		opacity: 0.4;
-		pointer-events: none;
-	}
+	@keyframes face-left  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
+	@keyframes face-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 
-	/* sun (PI) */
-	.sun {
-		position: absolute; top: 50%; left: 50%;
-		width: 128px; height: 128px; margin: -64px 0 0 -64px;
-		border-radius: 50%; z-index: 30; display: block;
-	}
-	.sun img {
-		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
-		border: 1px solid var(--shadow-color);
-		box-shadow: 0 6px 18px rgba(42, 42, 40, 0.20);
-		position: relative; z-index: 1;
-		transition: box-shadow 0.25s ease;
-	}
-	.sun-halo {
-		position: absolute; inset: -9px; border-radius: 50%;
-		border: 1.5px solid rgba(180, 83, 9, 0.36);
-		box-shadow: 0 0 0 7px rgba(180, 83, 9, 0.06);
-		pointer-events: none;
-	}
-	.sun:hover img { box-shadow: 0 9px 26px rgba(42, 42, 40, 0.28); }
-
-	/* orbit ring container — slow drift */
-	.orbit { position: absolute; inset: 0; animation: orbit-spin var(--dur) linear infinite; z-index: 20; }
-	.orbit--rev { animation-direction: reverse; }
-
-	/* planet placed statically on its ring */
-	.planet {
-		position: absolute; top: 50%; left: 50%;
-		width: var(--size); height: var(--size);
-		margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
-		transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius)));
-	}
-	/* counter-spin keeps faces upright (same duration as the orbit) */
-	.planet-spin {
-		display: block; width: 100%; height: 100%;
-		animation: planet-upright var(--dur) linear infinite;
-		transform-origin: center center;
-	}
-	.orbit--rev .planet-spin { animation-direction: reverse; }
-
-	.planet img {
-		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
-		border: 1px solid var(--shadow-color);
-		box-shadow: 0 3px 10px rgba(42, 42, 40, 0.16);
+	/* rounded squares — same shape as the People page (border-radius 8px), not circles */
+	.face { flex: 0 0 auto; display: block; width: 80px; height: 80px; border-radius: 8px; }
+	.face img {
+		width: 100%; height: 100%; border-radius: 8px; object-fit: cover; display: block;
+		border: 2px solid var(--background-color);
+		box-shadow: 0 3px 11px rgba(42, 42, 40, 0.15), 0 0 0 1px rgba(42, 42, 40, 0.05);
 		background: var(--block-color);
-		transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+		transition: transform 0.3s cubic-bezier(0.22, 0.68, 0.28, 1), box-shadow 0.3s ease;
 	}
-
-	/* name labels — revealed on hover */
-	.planet-label {
-		position: absolute; left: 50%; top: calc(100% + 7px);
-		transform: translateX(-50%);
-		white-space: nowrap;
-		font-family: var(--serif); font-size: 0.72rem;
-		color: var(--primary-color);
-		background: var(--background-color);
-		border: 1px solid var(--shadow-color);
-		border-radius: 5px; padding: 1px 7px;
-		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.12);
-		opacity: 0; pointer-events: none;
-		transition: opacity 0.2s ease;
-		z-index: 6;
+	/* identical lift for every avatar (uniform size) */
+	.face:hover img,
+	.face:focus-visible img {
+		transform: scale(1.12);
+		box-shadow: 0 10px 24px rgba(42, 42, 40, 0.22), 0 0 0 2px var(--accent);
 	}
-	.sun-label { font-size: 0.84rem; font-weight: 700; top: calc(100% + 11px); }
-
-	@keyframes orbit-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-	@keyframes planet-upright {
-		from { transform: rotate(calc(-1 * var(--angle))); }
-		to   { transform: rotate(calc(-1 * var(--angle) - 360deg)); }
-	}
-
-	/* hover: freeze the system, zoom the chosen planet, dim the rest */
-	.constellation:hover .orbit,
-	.constellation:hover .planet-spin,
-	.constellation:focus-within .orbit,
-	.constellation:focus-within .planet-spin { animation-play-state: paused; }
-
-	.constellation:hover .planet,
-	.constellation:focus-within .planet { opacity: 0.5; transition: opacity 0.25s ease; }
-	.constellation .planet:hover,
-	.constellation .planet:focus-visible { opacity: 1; z-index: 40; }
-
-	.planet:hover img,
-	.planet:focus-visible img {
-		transform: scale(1.55);
-		border: 1.5px solid var(--accent);
-		box-shadow: 0 8px 22px rgba(42, 42, 40, 0.30);
-	}
-	.planet:hover .planet-label,
-	.planet:focus-visible .planet-label,
-	.sun:hover .planet-label,
-	.sun:focus-visible .planet-label { opacity: 1; }
 
 	@media (prefers-reduced-motion: reduce) {
-		.v-track, .orbit, .planet-spin { animation: none !important; }
+		.v-track, .face-track, .partners-track { animation: none !important; }
 	}
 
 	/* ===================== NEWS TIMELINE ===================== */
@@ -472,36 +425,190 @@ const gallery = [
 	.news-toggle:checked ~ .news-more-btn .chev { transform: rotate(180deg); }
 	.news-toggle:focus-visible ~ .news-more-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-	/* ===================== GALLERY ===================== */
-	.gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-	.gallery-item { margin: 0; display: flex; flex-direction: column; }
-	.gallery-item img {
-		width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
-		border-radius: 10px; border: 1px solid var(--shadow-color); display: block;
-		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	/* ===================== HIGHLIGHTS (horizontal events) ===================== */
+	.events-section { display: flex; flex-direction: column; gap: 1.15rem; }
+	.events-head {
+		display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
+		padding-bottom: 0.4rem; border-bottom: 1px solid var(--shadow-color);
 	}
-	.gallery-item:hover img { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(42, 42, 40, 0.10); }
-	.gallery-item figcaption { margin-top: 0.5rem; text-align: center; font-size: 0.85rem; color: var(--secondary-color); }
+	.events-heading { font-size: 1.6rem; font-weight: 700; margin: 0; line-height: 1.1; }
+	.events-controls { display: flex; align-items: center; gap: 0.7rem; }
+	.events-more {
+		font-size: 0.82rem; font-weight: 500; letter-spacing: 0.01em;
+		color: var(--secondary-color); text-decoration: none; white-space: nowrap;
+		transition: color 0.2s ease;
+	}
+	.events-more:hover { color: var(--accent); }
+	.ev-arrow {
+		display: inline-flex; align-items: center; justify-content: center;
+		width: 34px; height: 34px; flex: 0 0 auto;
+		border: 1px solid var(--shadow-color); border-radius: 999px;
+		background: var(--background-color); color: var(--primary-color);
+		cursor: pointer;
+		transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+	}
+	.ev-arrow svg { width: 15px; height: 15px; }
+	.ev-arrow:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+	.ev-arrow:disabled { opacity: 0.3; cursor: default; }
+
+	.events-scroller {
+		display: flex; gap: 1.25rem;
+		overflow-x: auto; scroll-snap-type: x proximity;
+		padding: 0.3rem 0.25rem 1rem; margin: 0 -0.25rem;
+		scrollbar-width: none;
+		-webkit-mask-image: linear-gradient(90deg, #000 0, #000 94%, transparent 100%);
+		        mask-image: linear-gradient(90deg, #000 0, #000 94%, transparent 100%);
+	}
+	.events-scroller::-webkit-scrollbar { display: none; }
+
+	.event-card {
+		flex: 0 0 clamp(300px, 44%, 440px);
+		scroll-snap-align: start;
+		display: flex; flex-direction: column;
+		text-decoration: none; color: inherit;
+		transition: transform 0.32s cubic-bezier(0.22, 0.68, 0.28, 1);
+	}
+	.event-photo {
+		width: 100%; aspect-ratio: 3 / 2; overflow: hidden;
+		border-radius: 14px; border: 1px solid var(--shadow-color);
+		background: var(--block-color);
+		box-shadow: 0 4px 14px rgba(42, 42, 40, 0.08);
+		transition: box-shadow 0.32s ease, border-color 0.32s ease;
+	}
+	.event-photo img {
+		width: 100%; height: 100%; object-fit: cover; display: block;
+		transition: transform 0.5s cubic-bezier(0.22, 0.68, 0.28, 1);
+	}
+	.event-card:hover { transform: translateY(-4px); }
+	.event-card:hover .event-photo { box-shadow: 0 16px 34px rgba(42, 42, 40, 0.16); border-color: var(--remark-color); }
+	.event-card:hover .event-photo img { transform: scale(1.045); }
+
+	.event-caption { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.85rem 0.15rem 0; }
+	.event-meta {
+		font-family: var(--monospace); font-size: 0.62rem; letter-spacing: 0.1em;
+		text-transform: uppercase; color: var(--accent); font-weight: 600;
+	}
+	.event-title {
+		font-size: 1.05rem; font-weight: 700; line-height: 1.3; color: var(--primary-color);
+		transition: color 0.2s ease;
+	}
+	.event-card:hover .event-title { color: var(--accent-deep); }
+
+	/* ===================== COLLABORATORS (logo marquee) ===================== */
+	.partners-section { display: flex; flex-direction: column; gap: 1.4rem; }
+	.partners-heading {
+		font-size: 1.6rem; font-weight: 700; margin: 0;
+		padding-bottom: 0.4rem; border-bottom: 1px solid var(--shadow-color);
+	}
+	.partners-marquee {
+		overflow: hidden; width: 100%;
+		-webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+		        mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+	}
+	.partners-track {
+		display: flex; align-items: flex-start; gap: 3.2rem; width: max-content;
+		animation: partners-scroll 56s linear infinite;
+		will-change: transform;
+	}
+	.partners-marquee:hover .partners-track { animation-play-state: paused; }
+	@keyframes partners-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+	.partner {
+		flex: 0 0 auto;
+		display: flex; flex-direction: column; align-items: center; gap: 0.85rem;
+		width: 158px; text-align: center;
+	}
+	.partner-logo {
+		width: 132px; height: 54px;
+		display: flex; align-items: center; justify-content: center;
+	}
+	/* fill the box (definite size) + contain, so SVGs with viewBox-only (no width/height attrs) don't collapse to 0 */
+	.partner-logo img {
+		width: 100%; height: 100%;
+		object-fit: contain; display: block;
+		transition: transform 0.32s ease;
+	}
+	.partner:hover .partner-logo img { transform: scale(1.06); }
+	/* premium serif (Computer Modern via KaTeX) labels, enlarged */
+	.partner-name {
+		font-family: "KaTeX_Main", var(--serif);
+		font-size: 0.95rem; letter-spacing: 0.005em; line-height: 1.4;
+		color: var(--secondary-color);
+		transition: color 0.32s ease;
+	}
+	.partner:hover .partner-name { color: var(--primary-color); }
 
 	/* ===================== RESPONSIVE ===================== */
 	@media (max-width: 1000px) {
-		.showcase { height: 480px; }
+		.showcase { height: 500px; }
 		.showcase-col { width: 132px; flex-basis: 132px; }
-		.constellation-wrap { width: 432px; height: 432px; }
-		.constellation { transform: scale(0.8); }
+		.face-row { height: 96px; }
+		.face { width: 72px; height: 72px; }
 	}
 	@media (max-width: 768px) {
-		.showcase { height: 380px; }
+		.showcase { height: 420px; }
 		.showcase-col { display: none; }
-		.constellation-wrap { width: 356px; height: 356px; }
-		.constellation { transform: scale(0.66); }
+		.face-row { height: 88px; }
+		.face { width: 66px; height: 66px; }
 		.news-item { grid-template-columns: 1fr; gap: 0.15rem; }
 		.news-month { font-size: 0.82rem; }
-		.gallery { grid-template-columns: 1fr; gap: 0.8rem; }
+		.events-heading { font-size: 1.4rem; }
+		.event-card { flex-basis: 80%; }
 	}
 	@media (max-width: 480px) {
-		.showcase { height: 300px; }
-		.constellation-wrap { width: 281px; height: 281px; }
-		.constellation { transform: scale(0.52); }
+		.showcase { height: 340px; }
+		.face-row { height: 78px; }
+		.face { width: 58px; height: 58px; }
+		.event-card { flex-basis: 86%; }
+		.events-more { display: none; }
 	}
 </style>
+
+<script>
+	// Highlights scroller — prev/next arrows + edge state.
+	// rAF-driven scroll (no reliance on CSS smooth-scroll, which raced on first click).
+	// Guarded per element so it re-inits cleanly after Swup swaps the DOM.
+	function setupEventsScroller() {
+		const scroller = document.querySelector('.events-scroller') as HTMLElement | null;
+		if (!scroller || scroller.dataset.evReady === '1') return;
+		scroller.dataset.evReady = '1';
+
+		const prev = document.querySelector('.ev-prev') as HTMLButtonElement | null;
+		const next = document.querySelector('.ev-next') as HTMLButtonElement | null;
+		const card = scroller.querySelector('.event-card') as HTMLElement | null;
+
+		const step = () => (card ? card.getBoundingClientRect().width + 20 : scroller.clientWidth * 0.8);
+		const clamp = (v: number) => Math.max(0, Math.min(v, scroller.scrollWidth - scroller.clientWidth));
+
+		let raf = 0;
+		const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+		function animateTo(to: number) {
+			cancelAnimationFrame(raf);
+			const from = scroller!.scrollLeft;
+			const dist = clamp(to) - from;
+			if (Math.abs(dist) < 1) return;
+			const t0 = performance.now();
+			const dur = 420;
+			function frame(now: number) {
+				const t = Math.min(1, (now - t0) / dur);
+				scroller!.scrollLeft = from + dist * ease(t);
+				if (t < 1) raf = requestAnimationFrame(frame);
+			}
+			raf = requestAnimationFrame(frame);
+		}
+
+		const update = () => {
+			const max = scroller.scrollWidth - scroller.clientWidth - 8;
+			if (prev) prev.disabled = scroller.scrollLeft <= 8;
+			if (next) next.disabled = scroller.scrollLeft >= max;
+		};
+
+		if (prev) prev.addEventListener('click', () => animateTo(scroller.scrollLeft - step()));
+		if (next) next.addEventListener('click', () => animateTo(scroller.scrollLeft + step()));
+		scroller.addEventListener('scroll', update, { passive: true });
+		window.addEventListener('resize', update);
+		update();
+	}
+	setupEventsScroller();
+	document.addEventListener('astro:page-load', setupEventsScroller);
+</script>
