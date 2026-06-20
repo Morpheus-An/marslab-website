@@ -5,33 +5,21 @@
 			display: inline-block;
 
 			p {
-				padding: 6px 6px 12px;
+				padding: 5px 12px;
 				font-size: 1.1rem;
 				text-align: center;
 				letter-spacing: 0.015em;
 				color: var(--primary-color);
 				background-color: transparent;
-				transition: color 0.18s ease;
+				transition: color 0.15s ease, background-color 0.15s ease;
 			}
 
-			/* grounded crimson underline indicator — grows on hover, persists when active */
-			&::after {
-				content: "";
-				position: absolute;
-				left: 6px;
-				right: 6px;
-				bottom: 5px;
-				height: 2px;
-				background-color: #A51C30;
-				transform: scaleX(0);
-				transform-origin: center;
-				transition: transform 0.22s ease;
+			/* filled dark box on hover and for the active section */
+			&:hover p,
+			&.location p {
+				color: var(--background-color);
+				background-color: var(--primary-color);
 			}
-
-			&:hover p { color: #A51C30; }
-
-			&:hover::after,
-			&.location::after { transform: scaleX(1); }
 
 			&.location p { font-weight: 600; }
 	}

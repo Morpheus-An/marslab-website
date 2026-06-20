@@ -49,12 +49,20 @@ if (others.length) sections.push({ title: "Team", members: others });
 
 <Base title={t("navigation.people") || "People"} {locale}>
 	<main class="flex flex-col grow">
-		<h1 class="text-3xl font-bold mb-8">People</h1>
+		<h1 class="text-3xl font-bold mb-8">Martian People</h1>
 
 		{pi && (
 			<section class="role-section">
 				<h2 class="role-heading">Principal Investigator</h2>
-				<article class="pi-feature" id={personId(pi.name)}>
+				<article
+					class="pi-feature"
+					id={personId(pi.name)}
+					data-name={pi.name}
+					data-role={pi.position}
+					data-img={pi.image ? `${baseUrl}${pi.image.replace(/^\//, '')}` : ''}
+					data-bio={pi.bio || ''}
+					data-research={pi.research || ''}
+				>
 					<div class="pi-photo">
 						{pi.image ? (
 							<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="lazy" />
@@ -85,7 +93,15 @@ if (others.length) sections.push({ title: "Team", members: others });
 				<h2 class="role-heading">{section.title}</h2>
 				<div class="people-grid">
 					{section.members.map((person) => (
-						<article class="person" id={personId(person.name)}>
+						<article
+							class="person"
+							id={personId(person.name)}
+							data-name={person.name}
+							data-role={person.position}
+							data-img={person.image ? `${baseUrl}${person.image.replace(/^\//, '')}` : ''}
+							data-bio={person.bio || ''}
+							data-research={person.research || ''}
+						>
 							<div class="person-photo">
 								{person.image ? (
 									<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="lazy" />
@@ -126,6 +142,21 @@ if (others.length) sections.push({ title: "Team", members: others });
 				</div>
 			))}
 		</section>
+
+		<!-- Bio modal: opened by clicking a person's photo or name -->
+		<div class="bio-modal" id="bioModal" aria-hidden="true">
+			<div class="bio-modal-backdrop" data-close></div>
+			<div class="bio-modal-card" role="dialog" aria-modal="true" aria-label="Member biography">
+				<button class="bio-modal-close" data-close aria-label="Close">✕</button>
+				<div class="bio-modal-photo"><img src="" alt="" /></div>
+				<div class="bio-modal-info">
+					<h3 class="bio-modal-name"></h3>
+					<p class="bio-modal-role"></p>
+					<div class="bio-modal-bio"></div>
+					<div class="bio-modal-links person-links"></div>
+				</div>
+			</div>
+		</div>
 	</main>
 </Base>
 
@@ -292,6 +323,188 @@ if (others.length) sections.push({ title: "Team", members: others });
 		width: 16px;
 		height: 16px;
 		flex-shrink: 0;
+	}
+
+	/* Photo & name are clickable to open the bio modal */
+	.person-photo,
+	.person-name,
+	.pi-photo,
+	.pi-name {
+		cursor: pointer;
+	}
+
+	.person-name:hover,
+	.pi-name:hover {
+		color: var(--accent);
+	}
+
+	/* Bio modal */
+	.bio-modal {
+		position: fixed;
+		inset: 0;
+		z-index: 100;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		padding: 1.5rem;
+	}
+
+	.bio-modal.open {
+		display: flex;
+	}
+
+	.bio-modal-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(15, 15, 15, 0.35);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		animation: bm-fade 0.2s ease;
+	}
+
+	.bio-modal-card {
+		position: relative;
+		z-index: 1;
+		display: grid;
+		grid-template-columns: 260px 1fr;
+		gap: 1.75rem;
+		width: min(700px, 100%);
+		height: min(440px, 85vh);
+		background: var(--background-color);
+		border: 1px solid var(--shadow-color);
+		border-radius: 14px;
+		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+		padding: 1.75rem;
+		animation: bm-pop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	@keyframes bm-fade {
+		from { opacity: 0; }
+		to { opacity: 1; }
+	}
+
+	@keyframes bm-pop {
+		from { opacity: 0; transform: translateY(10px) scale(0.96); }
+		to { opacity: 1; transform: translateY(0) scale(1); }
+	}
+
+	/* Photo is vertically centered in the (taller) fixed-height column */
+	.bio-modal-photo {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.bio-modal-photo img {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		border-radius: 10px;
+		border: 1px solid var(--shadow-color);
+		display: block;
+	}
+
+	/* Right column: name/role pinned, bio scrolls, links pinned */
+	.bio-modal-info {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 0;
+	}
+
+	.bio-modal-name {
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--primary-color);
+		margin: 0;
+		line-height: 1.2;
+		flex-shrink: 0;
+	}
+
+	.bio-modal-role {
+		font-size: 0.95rem;
+		color: var(--secondary-color);
+		margin: 0.2rem 0 0.75rem 0;
+		flex-shrink: 0;
+	}
+
+	.bio-modal-bio {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		padding-right: 0.5rem;
+	}
+
+	.bio-modal-bio :global(p) {
+		font-size: 0.92rem;
+		line-height: 1.65;
+		color: var(--primary-color);
+		margin: 0 0 0.7rem 0;
+	}
+
+	.bio-modal-bio :global(p:last-child) {
+		margin-bottom: 0;
+	}
+
+	.bio-modal-links {
+		flex-shrink: 0;
+		margin-top: 0.4rem;
+		padding-top: 0.85rem;
+		border-top: 1px solid var(--shadow-color);
+	}
+
+	.bio-modal-close {
+		position: absolute;
+		top: 0.7rem;
+		right: 0.7rem;
+		width: 32px;
+		height: 32px;
+		border: none;
+		background: var(--block-color);
+		color: var(--secondary-color);
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.1rem;
+		line-height: 1;
+		z-index: 2;
+		transition: background 0.2s ease, color 0.2s ease;
+	}
+
+	.bio-modal-close:hover {
+		background: var(--shadow-color);
+		color: var(--primary-color);
+	}
+
+	:global(body.modal-open) {
+		overflow: hidden;
+	}
+
+	@media (max-width: 640px) {
+		.bio-modal-card {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+			height: auto;
+			max-height: 85vh;
+			overflow-y: auto;
+		}
+
+		.bio-modal-photo img {
+			width: 180px;
+		}
+
+		/* On mobile the whole card scrolls, so the bio doesn't need its own scroll */
+		.bio-modal-bio {
+			overflow: visible;
+			padding-right: 0;
+		}
+
+		.bio-modal-links {
+			border-top: none;
+			padding-top: 0.4rem;
+		}
 	}
 
 	/* Alumni — plain text list */

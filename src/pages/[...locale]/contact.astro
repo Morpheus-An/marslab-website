@@ -11,52 +11,79 @@ export async function getStaticPaths() {
 const { locale = i18n!.defaultLocale } = Astro.params;
 const t = i18nit(locale);
 
-// Define opportunities directly in the component for better control
-const contactEmail = "jianfei.yang@ntu.edu.sg";
+// External-link helper — accent "link ↗" anchor used inline.
+const link = (href: string, label = "link") =>
+	`<a class="opening-link" href="${href}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`;
 
+// PhD scholarships (names from marsyang.site/group; links provided by PI).
+const scholarships = [
+	"Nanyang Research Scholarship (normal, $3200/month after QE)",
+	`Interdisciplinary Graduate Programme (IGP) ${link("https://www.ntu.edu.sg/graduate-college/admissions/programme/interdisciplinary-graduate-programme/admission-requirement#Content_C011_Col00")}`,
+	`AISG Scholarship ($6300/month) ${link("https://aisingapore.org/research/phd-fellowship-programme/")}`,
+	`Singapore International Graduate Award (SINGA) ${link("https://www.a-star.edu.sg/Scholarships/for-graduate-studies/singapore-international-graduate-award-singa")}`,
+	`Nanyang President's Graduate Scholarship (NPGS) ${link("https://www.ntu.edu.sg/admissions/graduate/financialmatters/scholarships/npgs")}`,
+];
+
+// Each section renders an ordered set of blocks: paragraphs, bullet lists,
+// and (optionally) a nested sub-list under a bullet. html is trusted, static.
 const opportunities = [
 	{
 		title: "PhD Students",
 		icon: "lucide:graduation-cap",
-		description: "We are recruiting PhD students for the upcoming cycles. Strong backgrounds in robotics, machine learning, programming, and research are expected.",
-		details: [
-			"Apply to the NTU PhD program (School of Mechanical and Aerospace Engineering or School of Electrical and Electronic Engineering) and list Jianfei Yang as a potential advisor.",
-			"Competitive NTU Research Scholarships are available for outstanding applicants.",
+		blocks: [
+			{ type: "p", html: "We are actively recruiting highly motivated PhD students who are passionate about robotics, embodied AI, and machine learning." },
+			{ type: "list", items: [
+				"Email Prof. Jianfei Yang with their CV and a brief introduction of their research interests.",
+				{ html: "Review the available scholarship opportunities before applying, including:", sublist: scholarships },
+			] },
 		],
-		links: [
-			{ text: "Email Prof. Yang", url: `mailto:${contactEmail}` }
-		]
 	},
 	{
-		title: "Postdocs",
+		title: "Postdoctoral Researchers",
 		icon: "lucide:briefcase",
-		description: "We invite applications for postdoctoral researchers. We value independent thinkers eager to lead projects and mentor students.",
-		details: [
-			"Please email Prof. Jianfei Yang and include your CV, a 1–2 page research statement, reference contacts, and links to representative papers/code.",
+		blocks: [
+			{ type: "p", html: "We welcome applications from outstanding postdoctoral researchers. Interested candidates should email Prof. Jianfei Yang with the following materials:" },
+			{ type: "list", items: [
+				"Curriculum Vitae (CV)",
+				"One-page research statement",
+				"Contact information for references",
+				"At least one representative publication or project",
+			] },
 		],
-		links: [
-			{ text: "Email Prof. Yang", url: `mailto:${contactEmail}` }
-		]
 	},
 	{
-		title: "Master's & Undergraduate Students",
+		title: "Master's Students",
 		icon: "lucide:book-open",
-		description: "Master's and undergraduate students interested in research are welcome. Prior research or strong relevant coursework is preferred.",
-		details: [
-			"NTU students can reach out by email to discuss FYP, URECA, and research-assistant opportunities.",
+		blocks: [
+			{ type: "p", html: "We currently supervise NTU Master's students only. Before contacting us, please review the research interests of our lab members and identify the research direction that best aligns with your interests. Applicants should email at least one relevant lab member and Prof. Jianfei Yang." },
+			{ type: "p", html: "As the Master's dissertation carries academic units in NTU, applicants should ensure a minimum commitment of 15 hours per week to research activities before reaching out." },
 		],
-		links: [
-			{ text: "Email the Lab", url: `mailto:${contactEmail}` }
-		]
+	},
+	{
+		title: "Undergraduate Students",
+		icon: "lucide:school",
+		blocks: [
+			{ type: "p", html: `We welcome NTU undergraduate students through the URECA programme (${link("https://www.ntu.edu.sg/education/undergraduate-research-experience-on-campus-(ureca)")}) and other undergraduate research opportunities. Interested students are encouraged to contact Prof. Jianfei Yang with their CV and research interests.` },
+		],
 	},
 	{
 		title: "Visiting Researchers",
-		icon: "lucide:users",
-		description: "We welcome visiting students and researchers each year.",
-		details: ["Collaborations work best when there is clear overlap with our research and a specific project or idea in mind. Please email us with your CV and a short note about your interests, and we'll get in touch if there's a strong match."],
-		links: [
-			{ text: "Email the Lab", url: `mailto:${contactEmail}` },
-		]
+		icon: "lucide:globe",
+		blocks: [
+			{ type: "p", html: "We welcome visiting undergraduate students, graduate students, and researchers from around the world." },
+			{ type: "list", items: [
+				"Visiting graduate and PhD students: minimum stay of 6 months",
+				"Undergraduate summer research students: minimum stay of 3 months",
+			] },
+			{ type: "p", html: "Prospective visitors should contact Jianfei with their CV, expected visit duration, and a brief description of their research interests." },
+		],
+	},
+	{
+		title: "Application Note",
+		icon: "lucide:info",
+		blocks: [
+			{ type: "p", html: "Due to the large number of inquiries we receive, we are unfortunately unable to respond to every application. We will only contact shortlisted candidates for further discussion. Thank you for your interest in MARS Lab and for your understanding." },
+		],
 	},
 ];
 ---
@@ -66,40 +93,49 @@ const opportunities = [
 		<h1 class="text-3xl font-bold mb-6">Contact</h1>
 
 		<p class="intro-text">
-			We welcome students and researchers interested in robotics, embodied AI, computer vision,
-			multimodal learning, world models, and human–robot interaction to join or collaborate with our lab.
-			For general inquiries, please reach out by <a href={`mailto:${contactEmail}`} class="inline-link">email</a>.
+			We welcome researchers from diverse backgrounds related to robotics, embodied AI, machine learning,
+			computer vision, human–robot interaction, cognitive science, and other fields relevant to intelligent
+			physical agents. We are always open to new collaborations and interdisciplinary research opportunities.
 		</p>
+
+		<p class="intro-text">
+			For research collaborations, please feel free to directly contact the relevant MARS Lab member whose
+			research interests best match your topic.
+		</p>
+
+		<h2 class="join-heading">Join Us</h2>
 
 		<section class="openings">
 			{opportunities.map((opp) => (
 				<article class="opening">
 					<div class="opening-head">
-						<span class="opening-icon"><Icon name={opp.icon} size={20} /></span>
-						<h2 class="opening-title">{opp.title}</h2>
+						<span class="opening-icon"><Icon name={opp.icon} size={20} inline /></span>
+						<h3 class="opening-title">{opp.title}</h3>
 					</div>
 
 					<div class="opening-content">
-						<p class="opening-desc">{opp.description}</p>
-
-						{opp.details.length > 0 && (
-							<ul class="opening-details">
-								{opp.details.map((detail) => (
-									<li>{detail}</li>
-								))}
-							</ul>
-						)}
-
-						{opp.links && opp.links.length > 0 && (
-							<div class="opening-links">
-								{opp.links.map((link) => (
-									<a href={link.url} class="opening-link">
-										<span>{link.text}</span>
-										<Icon name="lucide:arrow-right" size={15} />
-									</a>
-								))}
-							</div>
-						)}
+						{opp.blocks.map((block) => (
+							block.type === "p" ? (
+								<p class="opening-desc" set:html={block.html} />
+							) : (
+								<ul class="opening-details">
+									{block.items.map((item) => (
+										typeof item === "string" ? (
+											<li set:html={item} />
+										) : (
+											<li>
+												<span set:html={item.html} />
+												{item.sublist && (
+													<ul class="opening-subdetails">
+														{item.sublist.map((s) => <li set:html={s} />)}
+													</ul>
+												)}
+											</li>
+										)
+									))}
+								</ul>
+							)
+						))}
 					</div>
 				</article>
 			))}
@@ -112,20 +148,19 @@ const opportunities = [
 		font-size: 1.05rem;
 		line-height: 1.75;
 		color: var(--secondary-color);
-		max-width: 72ch;
+		max-width: none;
 		margin: 0 0 1rem 0;
 	}
 
-	.inline-link {
-		color: var(--accent);
-		text-decoration: underline;
-		text-underline-offset: 2px;
-		font-weight: 600;
-		transition: opacity 0.2s ease;
+	.intro-text:last-of-type {
+		margin-bottom: 0.5rem;
 	}
 
-	.inline-link:hover {
-		opacity: 0.7;
+	.join-heading {
+		font-size: 1.6rem;
+		font-weight: 700;
+		color: var(--primary-color);
+		margin: 1.8rem 0 0;
 	}
 
 	/* Editorial listing — no cards/boxes, entries separated by thin rules */
@@ -135,9 +170,9 @@ const opportunities = [
 	}
 
 	.opening {
-		display: grid;
-		grid-template-columns: 240px 1fr;
-		gap: 2.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
 		padding: 2rem 0;
 		border-top: 1px solid var(--shadow-color);
 	}
@@ -183,16 +218,20 @@ const opportunities = [
 		margin: 0 0 0.85rem 0;
 	}
 
+	.opening-desc:last-child {
+		margin-bottom: 0;
+	}
+
 	.opening-details {
 		list-style: none;
 		padding: 0;
-		margin: 0 0 1.1rem 0;
+		margin: 0 0 0.4rem 0;
 		display: flex;
 		flex-direction: column;
 		gap: 0.6rem;
 	}
 
-	.opening-details li {
+	.opening-details > li {
 		font-size: 0.95rem;
 		line-height: 1.6;
 		color: var(--secondary-color);
@@ -200,54 +239,67 @@ const opportunities = [
 		position: relative;
 	}
 
-	.opening-details li::before {
-		content: "—";
+	.opening-details > li::before {
+		content: "▸";
 		position: absolute;
 		left: 0;
 		color: var(--accent);
 	}
 
-	.opening-links {
+	/* Nested sub-list (e.g. PhD scholarships) */
+	.opening-subdetails {
+		list-style: none;
+		padding: 0;
+		margin: 0.55rem 0 0 0;
 		display: flex;
-		flex-wrap: wrap;
-		gap: 1.5rem;
+		flex-direction: column;
+		gap: 0.45rem;
 	}
 
+	.opening-subdetails li {
+		font-size: 0.92rem;
+		line-height: 1.55;
+		color: var(--secondary-color);
+		padding-left: 1.4rem;
+		position: relative;
+	}
+
+	.opening-subdetails li::before {
+		content: "✓";
+		position: absolute;
+		left: 0;
+		top: 0.02em;
+		color: var(--accent);
+		font-weight: 700;
+		font-size: 0.85rem;
+	}
+
+	/* Inline external links (scholarships, URECA, …) */
 	.opening-link {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.35rem;
 		color: var(--accent);
 		font-weight: 600;
-		font-size: 0.95rem;
 		text-decoration: none;
-	}
-
-	.opening-link :global(figure) {
-		display: flex;
-		margin: 0;
-		transition: transform 0.2s ease;
+		white-space: nowrap;
+		border-bottom: 1px solid transparent;
+		transition: color 0.18s ease, border-color 0.18s ease;
 	}
 
 	.opening-link:hover {
-		text-decoration: underline;
-		text-underline-offset: 2px;
+		color: var(--accent-deep);
+		border-bottom-color: currentColor;
 	}
 
-	.opening-link:hover :global(figure) {
-		transform: translateX(3px);
-	}
-
-	/* Stack the title above the content on narrow screens */
 	@media (max-width: 768px) {
 		.opening {
-			grid-template-columns: 1fr;
-			gap: 0.85rem;
 			padding: 1.6rem 0;
 		}
 
 		.intro-text {
 			font-size: 1rem;
+		}
+
+		.join-heading {
+			font-size: 1.4rem;
 		}
 	}
 </style>

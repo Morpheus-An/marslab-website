@@ -119,6 +119,71 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 			
 			console.log('People page show more buttons initialized');
 		}
+
+		// Bio modal on the people page: click a photo/name to enlarge + show bio
+		const bioModalEl = document.getElementById('bioModal');
+		if (bioModalEl) {
+			const modal = bioModalEl;
+			const mPhoto = modal.querySelector('.bio-modal-photo') as HTMLElement;
+			const mImg = modal.querySelector('.bio-modal-photo img') as HTMLImageElement;
+			const mName = modal.querySelector('.bio-modal-name') as HTMLElement;
+			const mRole = modal.querySelector('.bio-modal-role') as HTMLElement;
+			const mBio = modal.querySelector('.bio-modal-bio') as HTMLElement;
+			const mLinks = modal.querySelector('.bio-modal-links') as HTMLElement;
+
+			function openModal(article: HTMLElement) {
+				const img = article.dataset.img || '';
+				mPhoto.style.display = img ? '' : 'none';
+				mImg.src = img;
+				mImg.alt = article.dataset.name || '';
+				mName.textContent = article.dataset.name || '';
+				mRole.textContent = article.dataset.role || '';
+				mBio.innerHTML = '';
+				[article.dataset.bio, article.dataset.research].forEach((txt) => {
+					if (txt) {
+						const p = document.createElement('p');
+						p.textContent = txt;
+						mBio.appendChild(p);
+					}
+				});
+				mLinks.innerHTML = '';
+				const links = article.querySelector('.person-links');
+				if (links) Array.from(links.children).forEach((a) => mLinks.appendChild(a.cloneNode(true)));
+				modal.classList.add('open');
+				modal.setAttribute('aria-hidden', 'false');
+				document.body.classList.add('modal-open');
+			}
+
+			function closeModal() {
+				modal.classList.remove('open');
+				modal.setAttribute('aria-hidden', 'true');
+				document.body.classList.remove('modal-open');
+			}
+
+			document.querySelectorAll('.person, .pi-feature').forEach((article) => {
+				(article as HTMLElement).querySelectorAll('.person-photo, .person-name, .pi-photo, .pi-name').forEach((tr) => {
+					tr.addEventListener('click', (e) => {
+						e.preventDefault();
+						openModal(article as HTMLElement);
+					});
+				});
+			});
+
+			modal.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', closeModal));
+
+			if (!(window as any).__bioEscBound) {
+				(window as any).__bioEscBound = true;
+				document.addEventListener('keydown', (e: KeyboardEvent) => {
+					if (e.key !== 'Escape') return;
+					const m = document.getElementById('bioModal');
+					if (m && m.classList.contains('open')) {
+						m.classList.remove('open');
+						m.setAttribute('aria-hidden', 'true');
+						document.body.classList.remove('modal-open');
+					}
+				});
+			}
+		}
 	}
 
 	// Run on initial page load
@@ -159,8 +224,8 @@ const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_UR
 		<div id="body" class="flex flex-col min-h-screen">
 			<header class="sticky top-0 flex items-center justify-between pt-3 pb-1 mb-4 bg-background z-2 sm:(static pb-12)">
 				<a href={getRelativeLocaleUrl(locale, "/constellation")} class="text-size-xl sm:text-size-3xl font-bold" title="The MARS Lab — member constellation">
-					<img src={`${baseUrl}mars_lab_logo_black.png`} alt={title} class="site-logo site-logo-light h-10 sm:h-12" />
-					<img src={`${baseUrl}mars_lab_logo_white.png`} alt={title} class="site-logo site-logo-dark h-10 sm:h-12" />
+					<img src={`${baseUrl}mars_lab_logo_black.png`} alt={title} class="site-logo site-logo-light h-11 sm:h-14" />
+					<img src={`${baseUrl}mars_lab_logo_white.png`} alt={title} class="site-logo site-logo-dark h-11 sm:h-14" />
 				</a>
 
 				<Navigator {locale} {route} {baseUrl} client:load>

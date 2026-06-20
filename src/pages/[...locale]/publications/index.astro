@@ -21,6 +21,7 @@ const publications = await getCollection("publications", publication => !publica
 const RESEARCH_AREAS = [
 	"World Models",
 	"Vision-Language-Action",
+	"Reinforcement Learning",
 	"Humanoid Robot",
 	"Robot Manipulation",
 	"Vision-Language Models",
@@ -156,10 +157,10 @@ const areas = [...knownAreas, ...extraAreas];
 				</div>
 			</div>
 
-			<!-- Filter sidebar (right): Research Area scrolls; Year and Status below -->
+			<!-- Filter sidebar (right): Research Topic scrolls; Year and Status below -->
 			<aside class="publications-sidebar">
 				<section class="filter-section">
-					<h3>Research Area</h3>
+					<h3>Research Topic</h3>
 					<div class="filter-group filter-scrollable">
 						{areas.map((area) => (
 							<label class="filter-label">
@@ -242,7 +243,7 @@ const areas = [...knownAreas, ...extraAreas];
 		gap: 0.05rem;
 	}
 
-	/* Research Area is long → its own scroll area */
+	/* Research Topic is long → its own scroll area */
 	.filter-scrollable {
 		max-height: 224px;
 		overflow-y: auto;

@@ -176,6 +176,7 @@ export default defineConfig({
           "reply",
           "rss",
           "scale",
+          "school",
           "send",
           "share-2",
           "signature",

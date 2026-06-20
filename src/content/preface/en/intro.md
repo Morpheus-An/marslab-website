@@ -2,4 +2,8 @@
 timestamp: 2026-04-15 00:00:00+00:00
 ---
 
-The **Multimodal embodied AI and Robotic Systems (MARS) Lab** at Nanyang Technological University, Singapore, is directed by Prof. Jianfei Yang. We study **Physical AI** — building intelligent systems that perceive, understand, reason about, and act in the physical world. Our research spans embodied AI, robot learning and manipulation, multimodal foundation models, world models for decision-making, and human–robot interaction, bringing together perception, generative modeling, and control to develop robots and embodied agents that are general, reliable, and ready for the real world.
+Welcome to the **Multimodal embodied AI and Robotic Systems (MARS) Lab** at Nanyang Technological University (NTU), Singapore. We seek to build reliable embodied intelligence in the physical world.
+
+Our research is driven by a central question: How can robots learn and interact with the world as robustly and adaptively as humans? To address this challenge, we develop **multimodal embodied AI** systems and **feedback learning** to understand physical interactions and acquire complex skills. We study the full stack of robotics, from multimodal perception models to world models, robot learning, decision making, and real-world deployment.
+
+Our long-term goal is to build trustworthy physical AI systems that can continually learn from experience, collaborate naturally with humans, and operate reliably in homes, healthcare, manufacturing, and scientific laboratories.

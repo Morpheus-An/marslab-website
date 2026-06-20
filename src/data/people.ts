@@ -5,7 +5,7 @@ export const people = [
 		position: "Principal Investigator",
 		image: "/people/jianfei-yang.jpg",
 		bio: "Jianfei Yang is an Assistant Professor (Tenure-Track) at Nanyang Technological University, where he directs the Multimodal embodied AI and Robotic Systems (MARS) Lab across the School of Mechanical and Aerospace Engineering and the School of Electrical and Electronic Engineering. He received his B.Eng. from Sun Yat-sen University (2016) and his Ph.D. from NTU (2020), and previously held positions at UC Berkeley (BEARS) and NTU as a Presidential Postdoctoral Fellow, with visiting roles at the University of Tokyo and Harvard. He has been recognized as a Top 2% Scientist and named to the Forbes Asia 30 Under 30 (2024).",
-		research: "His research centers on Physical AI — enabling physical systems such as robots, IoT, and industrial systems to perceive, understand, and interact with the physical world.",
+		research: "Jianfei Yang is an Assistant Professor in NTU, founding the MARS Lab in Sep 2024. He was previously a researcher at Harvard University, UC Berkeley, and the University of Tokyo. His long-term vision is to develop intelligent robots that can understand, assist, and meaningfully interact with people in the physical world.",
 		links: {
 			website: "https://marsyang.site/",
 			email: "jianfei.yang@ntu.edu.sg",
