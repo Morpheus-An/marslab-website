@@ -596,13 +596,21 @@ const partners = [
 </style>
 
 <script>
+	// In-memory init guards. CRITICAL: these MUST be JS WeakSets, NOT DOM attributes.
+	// Swup caches the *initial* page by snapshotting the live DOM — which already carries
+	// any `data-*-ready="1"` we wrote. On return, a cached attribute would make setup bail
+	// and leave the widget frozen at stale positions. A WeakSet lives only in memory, never
+	// serializes into the cache, so re-init fires on every genuine DOM swap.
+	const evInit = new WeakSet<HTMLElement>();
+	const cfInit = new WeakSet<HTMLElement>();
+
 	// Highlights scroller — prev/next arrows + edge state.
 	// rAF-driven scroll (no reliance on CSS smooth-scroll, which raced on first click).
 	// Guarded per element so it re-inits cleanly after Swup swaps the DOM.
 	function setupEventsScroller() {
 		const scroller = document.querySelector('.events-scroller') as HTMLElement | null;
-		if (!scroller || scroller.dataset.evReady === '1') return;
-		scroller.dataset.evReady = '1';
+		if (!scroller || evInit.has(scroller)) return;
+		evInit.add(scroller);
 
 		const prev = document.querySelector('.ev-prev') as HTMLButtonElement | null;
 		const next = document.querySelector('.ev-next') as HTMLButtonElement | null;
@@ -641,6 +649,15 @@ const partners = [
 		scroller.addEventListener('scroll', update, { passive: true });
 		window.addEventListener('resize', update);
 		update();
+
+		// release the window-level listener + guard before Swup swaps this DOM out, so the next
+		// visit re-inits cleanly (and we don't leak a resize handler bound to a detached scroller)
+		const evTeardown = () => {
+			window.removeEventListener('resize', update);
+			evInit.delete(scroller);
+			document.removeEventListener('astro:before-swap', evTeardown);
+		};
+		document.addEventListener('astro:before-swap', evTeardown);
 	}
 	setupEventsScroller();
 	document.addEventListener('astro:page-load', setupEventsScroller);
@@ -652,12 +669,12 @@ const partners = [
 	// Swup navigations so the rAF loop never writes to detached nodes.
 	function setupConstellation() {
 		const stage = document.querySelector('.cf-stage') as HTMLElement | null;
-		if (!stage || stage.dataset.cfReady === '1') return;
+		if (!stage || cfInit.has(stage)) return;
 		const svg = stage.querySelector('.cf-lines') as SVGSVGElement | null;
 		const edgesG = stage.querySelector('.cf-edges') as SVGGElement | null;
 		const nodeEls = Array.from(stage.querySelectorAll('.cf-node')) as HTMLAnchorElement[];
 		if (!svg || !edgesG || nodeEls.length === 0) return;
-		stage.dataset.cfReady = '1';
+		cfInit.add(stage);
 
 		const TAU = Math.PI * 2;
 		const SEED = 20260619;            // fixed ⇒ curated, identical layout every visit
@@ -822,13 +839,14 @@ const partners = [
 		const onRM = () => start();
 		RM.addEventListener?.('change', onRM);
 
-		// tear down before Swup replaces the DOM — stop rAF/observer so they never touch dead nodes
+		// tear down before Swup replaces the DOM — stop rAF/observer so they never touch dead nodes,
+		// and release the in-memory guard so the next visit re-measures + re-animates from scratch
 		const teardown = () => {
 			cancelAnimationFrame(rafId);
 			ro.disconnect();
 			RM.removeEventListener?.('change', onRM);
 			clearTimeout(rt);
-			stage!.dataset.cfReady = '';
+			cfInit.delete(stage!);
 			document.removeEventListener('astro:before-swap', teardown);
 		};
 		document.addEventListener('astro:before-swap', teardown);
