@@ -36,12 +36,17 @@ const peopleWithImages = people.filter(person => person.image);
 
 // ---- Member face marquee (home hero centre): horizontal rows, adjacent rows scroll opposite ----
 // (The rotating constellation now lives on its own /constellation page, opened from the logo.)
-const FACE_ROWS = 4;
-// Each row holds every member, rotated so adjacent rows don't line up; the markup
-// duplicates each row once so the scroll loops seamlessly.
+const FACE_ROWS = 3;
+// Give each row a DISJOINT slice of members so the same face never appears in two
+// rows at once. Each slice is then repeated enough to span the viewport, so the
+// marquee (markup duplicates the row once and scrolls -50%) loops without gaps.
+const perRow = Math.ceil(peopleWithImages.length / FACE_ROWS);
+const MIN_TILES = 12;
 const faceRows = Array.from({ length: FACE_ROWS }, (_, r) => {
-	const offset = Math.round((peopleWithImages.length / FACE_ROWS) * r);
-	return [...peopleWithImages.slice(offset), ...peopleWithImages.slice(0, offset)];
+	const group = peopleWithImages.slice(r * perRow, (r + 1) * perRow);
+	if (group.length === 0) return group;
+	const reps = Math.ceil(MIN_TILES / group.length);
+	return Array.from({ length: reps }, () => group).flat();
 });
 
 // ---- Robotic platforms (side vertical marquee) ----
@@ -134,7 +139,7 @@ const partners = [
 				<div class="face-marquee" role="img" aria-label="MARS Lab members">
 					{faceRows.map((row, ri) => (
 						<div class="face-row">
-							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${88 + ri * 12}s`}>
+							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${60 + ri * 10}s`}>
 								{[...row, ...row].map((person) => (
 									<a class="face" href={getRelativeLocaleUrl(locale, `/people#${slugify(person.name)}`)} title={person.name} aria-label={person.name}>
 										<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="eager" decoding="async" width="80" height="80" />
@@ -259,7 +264,7 @@ const partners = [
 		align-items: stretch;
 		justify-content: center;
 		gap: clamp(0.6rem, 2.2vw, 1.6rem);
-		height: 560px;
+		height: 350px;
 		margin-top: 0.25rem;
 		overflow: hidden;
 	}
@@ -267,8 +272,8 @@ const partners = [
 	/* --- side robot columns: vertical marquee --- */
 	.showcase-col {
 		position: relative;
-		width: 168px;
-		flex: 0 0 168px;
+		width: 146px;
+		flex: 0 0 146px;
 		overflow: hidden;
 		-webkit-mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
 		        mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
@@ -541,13 +546,13 @@ const partners = [
 
 	/* ===================== RESPONSIVE ===================== */
 	@media (max-width: 1000px) {
-		.showcase { height: 500px; }
-		.showcase-col { width: 132px; flex-basis: 132px; }
+		.showcase { height: 320px; }
+		.showcase-col { width: 122px; flex-basis: 122px; }
 		.face-row { height: 96px; }
 		.face { width: 72px; height: 72px; }
 	}
 	@media (max-width: 768px) {
-		.showcase { height: 420px; }
+		.showcase { height: 300px; }
 		.showcase-col { display: none; }
 		.face-row { height: 88px; }
 		.face { width: 66px; height: 66px; }
@@ -557,7 +562,7 @@ const partners = [
 		.event-card { flex-basis: 80%; }
 	}
 	@media (max-width: 480px) {
-		.showcase { height: 340px; }
+		.showcase { height: 260px; }
 		.face-row { height: 78px; }
 		.face { width: 58px; height: 58px; }
 		.event-card { flex-basis: 86%; }
