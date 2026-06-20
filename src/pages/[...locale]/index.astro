@@ -34,15 +34,13 @@ const slugify = (name: string) => name.toLowerCase().replace(/[^a-z]/g, '');
 
 const peopleWithImages = people.filter(person => person.image);
 
-// ---- Member face marquee (home hero centre): horizontal rows, adjacent rows scroll opposite ----
-// (The rotating constellation now lives on its own /constellation page, opened from the logo.)
-const FACE_ROWS = 4;
-// Each row holds every member, rotated so adjacent rows don't line up; the markup
-// duplicates each row once so the scroll loops seamlessly.
-const faceRows = Array.from({ length: FACE_ROWS }, (_, r) => {
-	const offset = Math.round((peopleWithImages.length / FACE_ROWS) * r);
-	return [...peopleWithImages.slice(offset), ...peopleWithImages.slice(0, offset)];
-});
+// ---- Member honeycomb (home hero centre) ----
+// Equal circular avatars on a triangular close-packed lattice (palindromic offset rows), the PI
+// (peopleWithImages[0] = Jianfei Yang) marked by a soft warm halo at the centre-most cell. The
+// placement, the calm weightless drift and the depth-of-field are computed client-side (see the
+// <script> below); the markup here is just the SSR node list so each avatar is a real, crawlable
+// <a> link to its profile. Hover ANY face → it lifts + shows a name label + the rest dim; click →
+// jump to that person on the People page.
 
 // ---- Robotic platforms (side vertical marquee) ----
 const robots = [
@@ -57,7 +55,7 @@ const robots = [
 const robotsLeft = robots;
 const robotsRight = [...robots].reverse();
 
-// ---- News (structured; show half, expand the rest) ----
+// ---- News (structured; show only the most recent, no expander) ----
 const news = [
 	{ month: "Apr 2026",     text: 'Our paper <a href="https://arxiv.org/abs/2602.07322" target="_blank" rel="noopener noreferrer" class="news-link">A2A</a> was accepted. Congratulations to Jindou Jia and Gen Li!', venue: "RSS 2026" },
 	{ month: "Mar 2026",     text: "We received an NVIDIA Academic Grant on Robotics." },
@@ -81,9 +79,8 @@ const news = [
 ];
 const NEWS_VISIBLE = 9;
 const newsHead = news.slice(0, NEWS_VISIBLE);
-const newsTail = news.slice(NEWS_VISIBLE);
 
-// ---- Lab highlights / events — horizontal scroller (non-clickable cards) ----
+// ---- Lab highlights / events — horizontal scroller (non-clickable, static cards) ----
 const events = [
 	{ image: "/events/supply-chain-2026.jpg",  title: "Robotics Supply-Chain Workshop", meta: "Singapore · 2026" },
 	{ image: "/events/mae-high-tea.jpg",       title: "MAE High Tea",                   meta: "NTU MAE · Student Outreach" },
@@ -111,7 +108,7 @@ const partners = [
 
 <Base title={t("navigation.home")} {locale}>
 	<main class="flex flex-col gap-6 sm:gap-12 flex-grow">
-		<!-- Hero: robotic platforms scroll on the sides; members orbit the PI in the center -->
+		<!-- Hero: robotic platforms scroll on the sides; members form a honeycomb in the center -->
 		<section class="showcase" aria-label="MARS Lab members and robotic platforms">
 			<div class="showcase-col">
 				<div class="v-track v-up">
@@ -131,18 +128,33 @@ const partners = [
 			</div>
 
 			<div class="showcase-center">
-				<div class="face-marquee" role="img" aria-label="MARS Lab members">
-					{faceRows.map((row, ri) => (
-						<div class="face-row">
-							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${88 + ri * 12}s`}>
-								{[...row, ...row].map((person) => (
-									<a class="face" href={getRelativeLocaleUrl(locale, `/people#${slugify(person.name)}`)} title={person.name} aria-label={person.name}>
-										<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="eager" decoding="async" width="80" height="80" />
-									</a>
-								))}
-							</div>
-						</div>
-					))}
+				<div class="cf-stage" role="img" aria-label="MARS Lab members">
+					<div class="cf-bg" aria-hidden="true"></div>
+					<div class="cf-dust" aria-hidden="true"></div>
+					<svg class="cf-lines" aria-hidden="true" preserveAspectRatio="none">
+						<g class="cf-edges"></g>
+					</svg>
+					<div class="cf-nodes">
+						{peopleWithImages.map((person, i) => (
+							<a
+								class:list={["cf-node", { "cf-node--pi": i === 0 }]}
+								href={getRelativeLocaleUrl(locale, `/people#${slugify(person.name)}`)}
+								title={person.name}
+								aria-label={person.name}
+							>
+								<span class="cf-ring" aria-hidden="true"></span>
+								<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="eager" decoding="async" width="96" height="96" />
+								<span class="cf-label">{person.name}</span>
+							</a>
+						))}
+					</div>
+					<noscript>
+						<style>
+							.cf-stage .cf-nodes { opacity: 1 !important; position: static; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; height: 100%; padding: 20px; box-sizing: border-box; }
+							.cf-stage .cf-node { position: static !important; transform: none !important; }
+							.cf-stage .cf-lines, .cf-stage .cf-dust { display: none; }
+						</style>
+					</noscript>
 				</div>
 			</div>
 
@@ -174,7 +186,7 @@ const partners = [
 			)
 		}
 
-		<!-- News timeline (show half, expand the rest — CSS only) -->
+		<!-- News timeline (most recent only) -->
 		<section class="news-section" aria-label="News">
 			<h2 class="news-heading">News</h2>
 			<ol class="news-list">
@@ -185,26 +197,9 @@ const partners = [
 					</li>
 				))}
 			</ol>
-
-			<input type="checkbox" id="news-toggle" class="news-toggle" aria-hidden="true" />
-
-			<ol class="news-list news-extra">
-				{newsTail.map((n) => (
-					<li class="news-item">
-						<span class="news-month">{n.month}</span>
-						<span class="news-body"><Fragment set:html={n.text} />{n.venue && <code class="news-venue">{n.venue}</code>}</span>
-					</li>
-				))}
-			</ol>
-
-			<label for="news-toggle" class="news-more-btn">
-				<span class="label-more">Show more</span>
-				<span class="label-less">Show less</span>
-				<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-			</label>
 		</section>
 
-		<!-- Highlights — horizontal-scrolling event cards (Prof. Yang's LinkedIn) -->
+		<!-- Highlights — horizontal-scrolling event cards (static, no hover lift) -->
 		<section class="events-section" aria-label="Lab highlights">
 			<div class="events-head">
 				<h2 class="events-heading">Highlights</h2>
@@ -327,47 +322,125 @@ const partners = [
 	@keyframes v-up   { from { transform: translateY(0); }    to { transform: translateY(-50%); } }
 	@keyframes v-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
 
-	/* --- center: member face marquee (horizontal rows, adjacent rows scroll opposite) --- */
-	.showcase-center { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; justify-content: center; }
+	/* ===================== CENTER: MEMBER HONEYCOMB ===================== */
+	.showcase-center { flex: 1 1 auto; min-width: 0; display: flex; }
 
-	.face-marquee {
-		display: flex; flex-direction: column; justify-content: center;
-		gap: 6px; width: 100%; height: 100%;
-		/* fade the rows out toward the left/right edges */
-		-webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
-		        mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent);
+	/* the measured stage — borderless: it dissolves into the porcelain page (no panel box) */
+	.cf-stage {
+		position: relative;
+		width: 100%; height: 100%;
+		isolation: isolate;
+		/* themable tokens (light) */
+		--cf-line: rgba(138, 61, 7, 0.42);
+		--cf-node-border: var(--background-color);
+		--cf-node-shadow: 0 2px 9px rgba(42, 42, 40, 0.14), 0 0 0 1px rgba(42, 42, 40, 0.05);
+		--cf-label-bg: var(--background-color);
+		--cf-label-fg: var(--primary-color);
+		--cf-ring: var(--accent);
 	}
-	/* taller than the avatar so the hover lift never gets clipped */
-	.face-row { display: flex; align-items: center; height: 104px; overflow: hidden; }
-	.face-track {
-		display: flex; gap: 20px; width: max-content;
-		animation: face-left var(--dur) linear infinite;
+
+	/* layer 0 — soft warm wash centred on the cluster, alpha-masked so it dissolves into the page */
+	.cf-bg { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+		background: radial-gradient(46% 52% at 50% 48%,
+			rgba(180, 83, 9, 0.07) 0%, rgba(180, 83, 9, 0.035) 34%, rgba(180, 83, 9, 0) 68%);
+		-webkit-mask-image: radial-gradient(62% 66% at 50% 50%, #000 52%, transparent 92%);
+		        mask-image: radial-gradient(62% 66% at 50% 50%, #000 52%, transparent 92%);
+	}
+
+	/* layer 0b — faint warm dust for a touch of texture (masked to fade at the edges) */
+	.cf-dust { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0.5;
+		background-image:
+			radial-gradient(1.3px 1.3px at 28% 30%, rgba(180, 83, 9, 0.16), transparent),
+			radial-gradient(1px 1px     at 70% 62%, rgba(180, 83, 9, 0.12), transparent),
+			radial-gradient(1.2px 1.2px at 52% 80%, rgba(42, 42, 40, 0.08), transparent),
+			radial-gradient(1px 1px     at 38% 66%, rgba(180, 83, 9, 0.10), transparent);
+		background-size: 240px 240px, 300px 300px, 200px 200px, 260px 260px;
+		-webkit-mask-image: radial-gradient(60% 64% at 50% 50%, #000 40%, transparent 88%);
+		        mask-image: radial-gradient(60% 64% at 50% 50%, #000 40%, transparent 88%);
+		animation: cf-dust-drift 120s linear infinite;
+	}
+	@keyframes cf-dust-drift { to { transform: translate3d(-30px, -20px, 0); } }
+
+	/* layer 1 — line layer (kept wired but unused for the honeycomb; no threads) */
+	.cf-lines {
+		position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;
+		pointer-events: none; overflow: visible;
+		opacity: 0; transition: opacity 0.9s ease;
+	}
+	.cf-stage.cf-ready .cf-lines { opacity: 1; }
+	.cf-edges :global(.cf-edge) {
+		fill: none; stroke: var(--cf-line); stroke-width: 0.9; opacity: 0.55;
+		stroke-linecap: round; vector-effect: non-scaling-stroke;
+		transition: opacity 0.3s ease, stroke-width 0.3s ease, stroke 0.3s ease;
+	}
+
+	/* layer 2 — floating avatar nodes */
+	.cf-nodes { position: absolute; inset: 0; z-index: 2; opacity: 0; transition: opacity 0.9s ease; }
+	.cf-stage.cf-ready .cf-nodes { opacity: 1; }
+
+	.cf-node {
+		position: absolute; top: 0; left: 0;
+		width: 62px; height: 62px;          /* JS overrides per node; default for the no-JS grid */
+		opacity: var(--cf-o, 1);
 		will-change: transform;
+		transition: opacity 0.3s ease;
+		-webkit-tap-highlight-color: transparent;
 	}
-	.face-track--rev { animation-name: face-right; }
-	.face-row:hover .face-track { animation-play-state: paused; }
-
-	@keyframes face-left  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
-	@keyframes face-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
-
-	/* rounded squares — same shape as the People page (border-radius 8px), not circles */
-	.face { flex: 0 0 auto; display: block; width: 80px; height: 80px; border-radius: 8px; }
-	.face img {
-		width: 100%; height: 100%; border-radius: 8px; object-fit: cover; display: block;
-		border: 2px solid var(--background-color);
-		box-shadow: 0 3px 11px rgba(42, 42, 40, 0.15), 0 0 0 1px rgba(42, 42, 40, 0.05);
+	.cf-node img {
+		width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block;
+		border: 2px solid var(--cf-node-border);
+		box-shadow: var(--cf-node-shadow);
 		background: var(--block-color);
-		transition: transform 0.3s cubic-bezier(0.22, 0.68, 0.28, 1), box-shadow 0.3s ease;
+		transition: transform 0.35s cubic-bezier(0.22, 0.68, 0.28, 1), box-shadow 0.3s ease;
 	}
-	/* identical lift for every avatar (uniform size) */
-	.face:hover img,
-	.face:focus-visible img {
-		transform: scale(1.12);
-		box-shadow: 0 10px 24px rgba(42, 42, 40, 0.22), 0 0 0 2px var(--accent);
+	.cf-node--pi img { border-width: 3px; box-shadow: 0 6px 20px rgba(42, 42, 40, 0.20), 0 0 0 1px rgba(42, 42, 40, 0.06); }
+
+	/* glow ring — PI keeps a soft permanent halo; others light up on hover */
+	.cf-ring {
+		position: absolute; inset: -7px; border-radius: 50%;
+		border: 1px solid transparent; pointer-events: none;
+		transition: border-color 0.3s ease, box-shadow 0.3s ease;
 	}
+	.cf-node--pi .cf-ring {
+		border-color: rgba(180, 83, 9, 0.30);
+		animation: cf-sun 5s ease-in-out infinite;
+	}
+	@keyframes cf-sun {
+		0%, 100% { box-shadow: 0 0 0 5px rgba(180, 83, 9, 0.045), 0 0 14px 1px rgba(180, 83, 9, 0.10); }
+		50%      { box-shadow: 0 0 0 7px rgba(180, 83, 9, 0.060), 0 0 20px 3px rgba(180, 83, 9, 0.16); }
+	}
+
+	/* hover / focus: lift + accent ring + label + stay fully opaque (works on EVERY avatar) */
+	.cf-node:hover, .cf-node:focus-visible { --cf-o: 1; z-index: 5; outline: none; }
+	.cf-node:hover img, .cf-node:focus-visible img {
+		transform: scale(1.18);
+		box-shadow: 0 10px 26px rgba(42, 42, 40, 0.24), 0 0 0 2px var(--cf-ring);
+	}
+
+	/* dim everyone else when one is hovered/focused (keep each node's depth opacity) */
+	.cf-nodes:has(.cf-node:hover) .cf-node,
+	.cf-nodes:focus-within .cf-node { opacity: calc(var(--cf-o, 1) * 0.3); }
+	.cf-nodes:has(.cf-node:hover) .cf-node:hover,
+	.cf-nodes:focus-within .cf-node:focus-visible { opacity: 1; }
+
+	/* name label */
+	.cf-label {
+		position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
+		white-space: nowrap;
+		font-family: var(--serif); font-size: 0.74rem; line-height: 1;
+		color: var(--cf-label-fg); background: var(--cf-label-bg);
+		border: 1px solid var(--shadow-color); border-radius: 6px; padding: 3px 8px;
+		box-shadow: 0 2px 6px rgba(42, 42, 40, 0.12);
+		opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+		z-index: 6;
+	}
+	.cf-node--labeltop .cf-label { top: auto; bottom: calc(100% + 8px); }
+	.cf-node--pi .cf-label { font-weight: 700; font-size: 0.82rem; }
+	.cf-node:hover .cf-label, .cf-node:focus-visible .cf-label { opacity: 1; }
 
 	@media (prefers-reduced-motion: reduce) {
-		.v-track, .face-track, .partners-track { animation: none !important; }
+		.v-track, .partners-track { animation: none !important; }
+		.cf-dust, .cf-node--pi .cf-ring { animation: none !important; }
 	}
 
 	/* ===================== NEWS TIMELINE ===================== */
@@ -403,35 +476,6 @@ const partners = [
 		background: none; border: none; padding: 0;
 	}
 
-	.news-toggle { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-	.news-extra { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.45s ease, opacity 0.35s ease; }
-	.news-toggle:checked ~ .news-extra { max-height: 900px; opacity: 1; }
-
-	.news-more-btn {
-		align-self: center;
-		display: inline-flex; align-items: center; gap: 0.5rem;
-		margin-top: 1.3rem; padding: 0.55rem 1.4rem;
-		font-size: 0.82rem; font-weight: 500; letter-spacing: 0.03em;
-		color: var(--secondary-color);
-		background: linear-gradient(180deg, var(--background-color) 0%, var(--block-color) 100%);
-		border: 1px solid var(--shadow-color);
-		border-radius: 999px;
-		box-shadow: 0 1px 2px rgba(42, 42, 40, 0.05);
-		cursor: pointer; user-select: none;
-		transition: border-color 0.22s ease, color 0.22s ease, box-shadow 0.25s ease, transform 0.22s ease;
-	}
-	.news-more-btn:hover {
-		border-color: var(--accent); color: var(--accent);
-		box-shadow: 0 6px 16px rgba(42, 42, 40, 0.10);
-		transform: translateY(-1px);
-	}
-	.chev { width: 14px; height: 14px; transition: transform 0.32s ease; }
-	.label-less { display: none; }
-	.news-toggle:checked ~ .news-more-btn .label-more { display: none; }
-	.news-toggle:checked ~ .news-more-btn .label-less { display: inline; }
-	.news-toggle:checked ~ .news-more-btn .chev { transform: rotate(180deg); }
-	.news-toggle:focus-visible ~ .news-more-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
-
 	/* ===================== HIGHLIGHTS (horizontal events) ===================== */
 	.events-section { display: flex; flex-direction: column; gap: 1.15rem; }
 	.events-head {
@@ -462,27 +506,22 @@ const partners = [
 	}
 	.events-scroller::-webkit-scrollbar { display: none; }
 
+	/* static, premium cards — photos are fixed in place (no hover lift / zoom) */
 	.event-card {
 		flex: 0 0 clamp(300px, 44%, 440px);
 		scroll-snap-align: start;
 		display: flex; flex-direction: column;
 		text-decoration: none; color: inherit;
-		transition: transform 0.32s cubic-bezier(0.22, 0.68, 0.28, 1);
 	}
 	.event-photo {
 		width: 100%; aspect-ratio: 3 / 2; overflow: hidden;
 		border-radius: 14px; border: 1px solid var(--shadow-color);
 		background: var(--block-color);
-		box-shadow: 0 4px 14px rgba(42, 42, 40, 0.08);
-		transition: box-shadow 0.32s ease, border-color 0.32s ease;
+		box-shadow: 0 6px 20px rgba(42, 42, 40, 0.10), 0 1px 2px rgba(42, 42, 40, 0.06);
 	}
 	.event-photo img {
 		width: 100%; height: 100%; object-fit: cover; display: block;
-		transition: transform 0.5s cubic-bezier(0.22, 0.68, 0.28, 1);
 	}
-	.event-card:hover { transform: translateY(-4px); }
-	.event-card:hover .event-photo { box-shadow: 0 16px 34px rgba(42, 42, 40, 0.16); border-color: var(--remark-color); }
-	.event-card:hover .event-photo img { transform: scale(1.045); }
 
 	.event-caption { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.85rem 0.15rem 0; }
 	.event-meta {
@@ -491,9 +530,7 @@ const partners = [
 	}
 	.event-title {
 		font-size: 1.05rem; font-weight: 700; line-height: 1.3; color: var(--primary-color);
-		transition: color 0.2s ease;
 	}
-	.event-card:hover .event-title { color: var(--accent-deep); }
 
 	/* ===================== COLLABORATORS (logo marquee) ===================== */
 	.partners-section { display: flex; flex-direction: column; gap: 1.4rem; }
@@ -543,14 +580,10 @@ const partners = [
 	@media (max-width: 1000px) {
 		.showcase { height: 500px; }
 		.showcase-col { width: 132px; flex-basis: 132px; }
-		.face-row { height: 96px; }
-		.face { width: 72px; height: 72px; }
 	}
 	@media (max-width: 768px) {
 		.showcase { height: 420px; }
 		.showcase-col { display: none; }
-		.face-row { height: 88px; }
-		.face { width: 66px; height: 66px; }
 		.news-item { grid-template-columns: 1fr; gap: 0.15rem; }
 		.news-month { font-size: 0.82rem; }
 		.events-heading { font-size: 1.4rem; }
@@ -558,8 +591,6 @@ const partners = [
 	}
 	@media (max-width: 480px) {
 		.showcase { height: 340px; }
-		.face-row { height: 78px; }
-		.face { width: 58px; height: 58px; }
 		.event-card { flex-basis: 86%; }
 	}
 </style>
@@ -582,8 +613,6 @@ const partners = [
 
 		let raf = 0;
 		// easeInOutCubic — gentle acceleration AND deceleration (no abrupt start/stop).
-		// rAF tween (direct scrollLeft) is used instead of native smooth-scroll because the
-		// latter silently no-ops without user activation; this is reliable + smooth at 60fps.
 		const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 		function animateTo(to: number) {
 			cancelAnimationFrame(raf);
@@ -615,4 +644,195 @@ const partners = [
 	}
 	setupEventsScroller();
 	document.addEventListener('astro:page-load', setupEventsScroller);
+
+	// ---- Member honeycomb (home hero centre) ----
+	// Equal circular avatars laid out as a triangular close-packed honeycomb (palindromic offset
+	// rows). A single rAF loop applies a calm sum-of-sines drift to each node. Every face is hoverable
+	// (lift + name label + dim the rest) and links to its People profile. Guarded + torn down across
+	// Swup navigations so the rAF loop never writes to detached nodes.
+	function setupConstellation() {
+		const stage = document.querySelector('.cf-stage') as HTMLElement | null;
+		if (!stage || stage.dataset.cfReady === '1') return;
+		const svg = stage.querySelector('.cf-lines') as SVGSVGElement | null;
+		const edgesG = stage.querySelector('.cf-edges') as SVGGElement | null;
+		const nodeEls = Array.from(stage.querySelectorAll('.cf-node')) as HTMLAnchorElement[];
+		if (!svg || !edgesG || nodeEls.length === 0) return;
+		stage.dataset.cfReady = '1';
+
+		const TAU = Math.PI * 2;
+		const SEED = 20260619;            // fixed ⇒ curated, identical layout every visit
+		const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
+		// Mulberry32 — tiny deterministic PRNG
+		function rng(seed: number) {
+			let s = seed >>> 0;
+			return () => {
+				s = (s + 0x6d2b79f5) | 0;
+				let t = Math.imul(s ^ (s >>> 15), 1 | s);
+				t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+				return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+			};
+		}
+
+		interface CNode {
+			el: HTMLElement; isPI: boolean; size: number; z: number;
+			bx: number; by: number; x: number; y: number;
+			ax: number; ay: number; fx: number; fy: number; phx: number; phy: number;
+		}
+		let nodes: CNode[] = [];
+		let W = 0, H = 0;
+		const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+		function measure() {
+			const r = stage!.getBoundingClientRect();
+			W = Math.max(1, Math.round(r.width));
+			H = Math.max(1, Math.round(r.height));
+			svg!.setAttribute('viewBox', `0 0 ${W} ${H}`);
+		}
+
+		// Honeycomb mosaic — equal circular avatars on a triangular close-packed lattice, laid out as
+		// palindromic offset rows ([4,5,4,5,4]=22) so the wall is exactly symmetric on both axes and every
+		// nearest neighbour is the same distance apart (a true honeycomb). Elegance/coordination come from
+		// a soft depth gradient (centre vivid → edges gently recede, which also rounds the silhouette),
+		// a calm slow drift, and the PI marked by its warm halo at the centre-most cell. All seeded.
+		function hexRows(n: number): number[] {
+			if (n === 22) return [4, 5, 4, 5, 4];
+			const R = 5, base = Math.floor(n / R);
+			const rows = new Array(R).fill(base);
+			const order = [2, 1, 3, 0, 4];                 // fill remainder centre-out (hexagon bulge)
+			for (let i = 0; i < n - base * R; i++) rows[order[i % R]]++;
+			return rows;
+		}
+
+		function layout() {
+			const cx = W / 2, cy = H / 2;
+			const compact = H <= 360;
+			const count = nodeEls.length;
+			const margin = compact ? 14 : 22;
+			const RX = Math.max(40, W / 2 - margin), RY = Math.max(40, H / 2 - margin);
+			const gap = compact ? 5 : 6;                    // tight rims → cohesive "people wall"
+			const VS = Math.sqrt(3) / 2;                    // row vertical pitch = VS * s
+
+			const rows = hexRows(count);
+			const R = rows.length, maxRow = Math.max(...rows);
+			// self-fit centre spacing s from BOTH width and height limits (then 3% safety)
+			const sW = (2 * RX + gap) / maxRow;
+			const sH = (2 * RY + gap) / ((R - 1) * VS + 1);
+			let s = Math.min(sW, sH) * 0.97;
+			let cell = Math.max(20, s - gap);
+
+			// centred rows → exact L-R symmetry; k vs k±1 counts auto-offset by half a cell (honeycomb)
+			const pos: { x: number; y: number }[] = [];
+			for (let r = 0; r < R; r++) {
+				const n = rows[r];
+				const y = cy + (r - (R - 1) / 2) * VS * s;
+				for (let c = 0; c < n; c++) pos.push({ x: cx + (c - (n - 1) / 2) * s, y });
+			}
+
+			// safety: uniform scale-to-fit (keeps the tessellation intact)
+			let minx = 1e9, maxx = -1e9, miny = 1e9, maxy = -1e9;
+			for (const p of pos) { minx = Math.min(minx, p.x); maxx = Math.max(maxx, p.x); miny = Math.min(miny, p.y); maxy = Math.max(maxy, p.y); }
+			const sc = Math.min(1, RX / ((maxx - minx) / 2 + cell / 2), RY / ((maxy - miny) / 2 + cell / 2));
+			if (sc < 1) { for (const p of pos) { p.x = cx + (p.x - cx) * sc; p.y = cy + (p.y - cy) * sc; } cell *= sc; }
+
+			// PI = centre-most cell (an even-count honeycomb has no dead-centre cell; this ½-cell offset is
+			// the most balanced choice — the wall stays symmetric and the halo marks the lead)
+			let piIdx = 0, best = Infinity;
+			for (let k = 0; k < pos.length; k++) { const d = Math.hypot(pos[k].x - cx, pos[k].y - cy); if (d < best) { best = d; piIdx = k; } }
+			const ordered = [pos[piIdx], ...pos.filter((_, k) => k !== piIdx)];
+
+			let maxD = 1;
+			for (const p of ordered) maxD = Math.max(maxD, Math.hypot(p.x - cx, p.y - cy));
+
+			const csize = Math.round(cell);
+			const frand = rng(SEED ^ 0x9e3779b9);
+			nodes = ordered.map((p, k) => {
+				const el = nodeEls[k];
+				const isPI = k === 0;
+				const d = Math.hypot(p.x - cx, p.y - cy);
+				const z = isPI ? 1 : clamp(1 - d / maxD, 0, 1);   // centre nearer → vivid; edges recede
+				const sm = z * z * (3 - 2 * z);                   // smoothstep → clear depth-of-field
+				const o = isPI ? 1 : 0.66 + 0.34 * sm;
+				const amp = (compact ? 0.9 : 1.4) * (isPI ? 0.6 : 1);   // calm, weightless drift
+				el.style.width = csize + 'px'; el.style.height = csize + 'px';
+				el.style.setProperty('--cf-o', o.toFixed(3));
+				el.classList.toggle('cf-node--labeltop', p.y > H * 0.72);
+				return {
+					el, isPI, size: csize, z, bx: p.x, by: p.y, x: p.x, y: p.y,
+					ax: amp * (0.7 + frand() * 0.6), ay: amp * (0.7 + frand() * 0.6),
+					fx: 0.06 + frand() * 0.08, fy: 0.06 + frand() * 0.08,
+					phx: frand() * TAU, phy: frand() * TAU,
+				};
+			});
+		}
+
+		function writePositions() {
+			for (const n of nodes) {
+				n.el.style.transform = `translate3d(${(n.x - n.size / 2).toFixed(1)}px, ${(n.y - n.size / 2).toFixed(1)}px, 0)`;
+			}
+		}
+
+		let rafId = 0, simT = 0, lastNow = 0, timeScale = 1;
+		function frame(now: number) {
+			if (!lastNow) lastNow = now;
+			const dt = Math.min(0.05, (now - lastNow) / 1000); lastNow = now;
+			simT += dt * timeScale;
+			const t = simT;
+			for (const n of nodes) {
+				n.x = n.bx + n.ax * Math.sin(n.fx * t + n.phx);
+				n.y = n.by + n.ay * Math.sin(n.fy * t + n.phy);
+			}
+			writePositions();
+			rafId = requestAnimationFrame(frame);
+		}
+		function renderStatic() { for (const n of nodes) { n.x = n.bx; n.y = n.by; } writePositions(); }
+		function start() {
+			cancelAnimationFrame(rafId); rafId = 0; lastNow = 0;
+			if (RM.matches) renderStatic(); else rafId = requestAnimationFrame(frame);
+		}
+
+		function rebuild() { measure(); layout(); }
+
+		// interactions — delegated; slow the drift while a face is hovered/focused
+		stage.addEventListener('pointerover', (ev) => {
+			if ((ev.target as HTMLElement).closest('.cf-node')) timeScale = 0.12;
+		});
+		stage.addEventListener('pointerout', (ev) => {
+			const from = (ev.target as HTMLElement).closest('.cf-node');
+			const rel = ev.relatedTarget as HTMLElement | null;
+			const to = rel && rel.closest ? rel.closest('.cf-node') : null;
+			if (from && from !== to && !to) timeScale = 1;
+		});
+		stage.addEventListener('focusin', (ev) => { if ((ev.target as HTMLElement).closest('.cf-node')) timeScale = 0.12; });
+		stage.addEventListener('focusout', (ev) => { if ((ev.target as HTMLElement).closest('.cf-node')) timeScale = 1; });
+
+		// initial paint (base positions first → no top-left flash), then reveal + animate
+		rebuild();
+		renderStatic();
+		start();
+		requestAnimationFrame(() => stage!.classList.add('cf-ready'));
+
+		// re-layout on stage resize (side cols collapse at ≤768 → width jumps); keep drift phases
+		let rt = 0;
+		const ro = new ResizeObserver(() => {
+			clearTimeout(rt);
+			rt = window.setTimeout(() => { rebuild(); if (RM.matches) renderStatic(); }, 130);
+		});
+		ro.observe(stage);
+
+		const onRM = () => start();
+		RM.addEventListener?.('change', onRM);
+
+		// tear down before Swup replaces the DOM — stop rAF/observer so they never touch dead nodes
+		const teardown = () => {
+			cancelAnimationFrame(rafId);
+			ro.disconnect();
+			RM.removeEventListener?.('change', onRM);
+			clearTimeout(rt);
+			stage!.dataset.cfReady = '';
+			document.removeEventListener('astro:before-swap', teardown);
+		};
+		document.addEventListener('astro:before-swap', teardown);
+	}
+	setupConstellation();
+	document.addEventListener('astro:page-load', setupConstellation);
 </script>

@@ -59,16 +59,16 @@
     <header class="grid gap-5 c-secondary grid-rows-[repeat(5,1fr)] sm:(grid-rows-none grid-cols-[repeat(4,1fr)])">
 		<button onclick={() => (menu = false)} class="sm:hidden">{@render close()}</button>
 
-		<a href={getUrl("/")} class:location={route == getUrl("/") || route.startsWith(getUrl("/preface"))}>
+		<a href={getUrl("/")} class:location={norm(route) === norm(getUrl("/")) || norm(route).startsWith(norm(getUrl("/preface")))}>
 			<p>{t("navigation.home")}</p>
 		</a>
-        <a href={getUrl("/publications")} class:location={route.startsWith(getUrl("/publications"))}>
+        <a href={getUrl("/publications")} class:location={norm(route).startsWith(norm(getUrl("/publications")))}>
             <p>{t("navigation.publications") || "Publications"}</p>
         </a>
-        <a href={getUrl("/people")} class:location={route.startsWith(getUrl("/people"))}>
+        <a href={getUrl("/people")} class:location={norm(route).startsWith(norm(getUrl("/people")))}>
             <p>{t("navigation.people")}</p>
         </a>
-        <a href={getUrl("/contact")} class:location={route.startsWith(getUrl("/contact"))}>
+        <a href={getUrl("/contact")} class:location={norm(route).startsWith(norm(getUrl("/contact")))}>
 			<p>{t("navigation.join") || "Contact"}</p>
 		</a>
 	</header>
@@ -98,6 +98,12 @@
 		// For other pages, use getRelativeLocaleUrl with the path
 		return getRelativeLocaleUrl(locale, path);
 	};
+
+	// Normalise a path for comparison: drop a single trailing slash (GitHub Pages serves the home
+	// and section pages WITH a trailing slash even though trailingSlash:never, so a raw `==` against
+	// the slash-less href fails — that left the active highlight inconsistent between Home and the
+	// other tabs). Comparing normalised paths makes all four nav items detect "active" identically.
+	const norm = (s: string) => (s.length > 1 && s.endsWith("/") ? s.slice(0, -1) : s);
 
 	// Control mobile menu visibility state
 	let menu: boolean = $state(false);
