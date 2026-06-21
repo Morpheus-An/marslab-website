@@ -283,28 +283,7 @@ export const alumni = [
 		group: "Master of Science (MSc)",
 		members: [
 			{ name: "Wu Tao", note: "NTU, PhD", topic: "Noisy Embodied Question Answering", period: "2024–2025" },
-			{ name: "Zuo Jia", note: "XPENG Humanoid Robot", topic: "mmWave Radar Sensing for ECG", period: "2023–2024" },
-			{ name: "Li Han", note: "BYD", topic: "3D Pose Estimation in Hyperbolic Space", period: "2023–2024" },
-			{ name: "Ma Zhenduo", note: "AVIC Aerodynamics Research Institute", topic: "WiFi Sensing using WiFi-7", period: "2023–2024" },
-			{ name: "Huang Runxi", note: "HKUST, PhD", topic: "Wireless Human Pose Rendering", period: "2023–2024" },
-			{ name: "Huang Shunyu", note: "TSMC", topic: "Graph Transfer Learning for Cross-Modal Supervision", period: "2022–2024" },
-			{ name: "Wang Junfei", note: "HUAWEI", topic: "Federated Learning with Blockchains", period: "2022–2024" },
-			{ name: "Tang Shijie", note: "National Intellectual Property Administration", topic: "Bimodal Learning for WiFi-Vision Human Pose Estimation", period: "2022–2023" },
-			{ name: "Yan Mingxue", note: "NTU, PhD", topic: "Vital Sign Detection via mmWave Radar and Deep Learning", period: "2022–2023" },
-			{ name: "Deng Lang", note: "UESTC, PhD", topic: "WiFi and Camera Fusion for Smart Sensing", period: "2021–2022" },
-			{ name: "Zhou Yunjiao", note: "NTU, PhD", topic: "Multimodal Learning for Road Segmentation in Autonomous Driving", period: "2021–2022" },
-			{ name: "Yang Zhiyuan", note: "NTU, PhD", topic: "Point Cloud Model Compression", period: "2021–2022" },
-			{ name: "Shi Mengqi", topic: "Adversarial Learning for Multimodal Segmentation", period: "2021–2022" },
-			{ name: "Hu Jiaxing", note: "Alibaba", topic: "WiFi-based Respiration Detection", period: "2020–2021" },
-			{ name: "Lyu Qi", note: "HUAWEI", topic: "Real-time WiFi Sensing System", period: "2020–2021" }
-		]
-	},
-	{
-		group: "Undergraduate (Final Year Project)",
-		members: [
-			{ name: "Chen Xinyan", note: "Scientist, SAP", topic: "Multimodal Wireless Sensing", period: "2023" },
-			{ name: "Wang Zijie", note: "NTU, PhD", period: "2019" },
-			{ name: "Pan Xingmeng", note: "RWE Supply & Trading GmbH", period: "2019" }
+			{ name: "Zuo Jia", note: "XPENG Humanoid Robot", topic: "mmWave Radar Sensing for ECG", period: "2023–2024" }
 		]
 	}
 ];

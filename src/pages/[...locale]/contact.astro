@@ -275,16 +275,18 @@ const opportunities = [
 	}
 
 	/* Inline external links (scholarships, URECA, …) */
-	.opening-link {
+	/* :global because these anchors are injected via set:html and therefore don't
+	   carry Astro's scoped data-astro-cid attribute — a scoped rule would never match. */
+	:global(.opening-link) {
 		color: var(--accent);
-		font-weight: 600;
+		font-weight: 700;
 		text-decoration: none;
 		white-space: nowrap;
-		border-bottom: 1px solid transparent;
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
 		transition: color 0.18s ease, border-color 0.18s ease;
 	}
 
-	.opening-link:hover {
+	:global(.opening-link:hover) {
 		color: var(--accent-deep);
 		border-bottom-color: currentColor;
 	}

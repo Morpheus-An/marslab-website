@@ -51,9 +51,11 @@ const faceRows = Array.from({ length: FACE_ROWS }, (_, r) => {
 
 // ---- Robotic platforms (side vertical marquee) ----
 const robots = [
+	// `scale` zooms the photo within its 1:1 frame so robots that sit small in their
+	// source image (e.g. Galaxea) read at a comparable size to the others.
 	{ name: "Unitree G1", type: "Humanoid", qty: 2, image: "/equipment/unitree-g1.jpg" },
-	{ name: "ROKAE Human.X", type: "Humanoid", qty: 3, image: "/equipment/rokae-humanx.jpg" },
-	{ name: "Galaxea R1 Lite", type: "Mobile Manipulator", qty: 1, image: "/equipment/galaxea-r1.jpg" },
+	{ name: "ROKAE Human.X", type: "Humanoid", qty: 3, image: "/equipment/rokae-humanx.png", scale: 0.9 },
+	{ name: "Galaxea R1 Lite", type: "Mobile Manipulator", qty: 1, image: "/equipment/galaxea-r1.jpg", scale: 1.85 },
 	{ name: "Franka Panda", type: "Robot Arm", qty: 1, image: "/equipment/franka-panda.jpg" },
 	{ name: "UR5e", type: "Robot Arm", qty: 1, image: "/equipment/ur5e.jpg" },
 	{ name: "UFactory xArm", type: "Robot Arm", qty: 1, image: "/equipment/ufactory-xarm.jpg" },
@@ -71,14 +73,14 @@ const news = [
 	{ month: "Jan 2026",   text: "Our real-world reinforcement learning paper was accepted. Congratulations to Xiangyu Chen!", venue: "ICRA 2026" },
 	{ month: "Jan 2026",   text: "Two papers were accepted. Congratulations to Xinyan Chen and Chenxi Jiang!", venue: "ICLR 2026" },
 	{ month: "Nov 2025",  text: "Three papers were accepted.", venue: "AAAI 2026" },
-	{ month: "Sep 2025", text: "Three papers — HoloLLM, Benford's Curse, and Intend to Move — were accepted.", venue: "NeurIPS 2025" },
+	{ month: "Sep 2025", text: "Three papers (HoloLLM, Benford's Curse, and Intend to Move) were accepted.", venue: "NeurIPS 2025" },
 	{ month: "Aug 2025",    text: "We welcomed five new members to the lab." },
 	{ month: "Jun 2025",      text: "Two papers were accepted.", venue: "IROS 2025" },
 	{ month: "May 2025",       text: "Our humanoid robot MARS-H joined the lab." },
 	{ month: "Feb 2025",  text: "We established a partnership with Abio for robotic lab automation." },
 	{ month: "Feb 2025",  text: "Our project was supported by Microsoft Accelerating Foundation Models Research." },
 	{ month: "Feb 2025",  text: "Our Feedback Neural Network paper was selected as an oral (top 1.8%).", venue: "ICLR 2025" },
-	{ month: "Jan 2025",   text: "Two papers — X-Fi and Feedback Neural Network — were accepted.", venue: "ICLR 2025" },
+	{ month: "Jan 2025",   text: "Two papers (X-Fi and Feedback Neural Network) were accepted.", venue: "ICLR 2025" },
 	{ month: "Jan 2025",   text: "Our point registration paper was accepted. Congratulations to Geng Li!", venue: "ICRA 2025" },
 	{ month: "Jan 2025",   text: "The lab joined Project Aria by Meta." },
 	{ month: "Sep 2024", text: "Chuhao Zhou won first place at the Data Distillation Challenge.", venue: "ECCV 2024" },
@@ -122,7 +124,7 @@ const partners = [
 					{[...robotsLeft, ...robotsLeft].map((r) => (
 						<article class="robot-tile">
 							<div class="robot-photo">
-								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" />
+								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" style={(r as any).scale ? `transform: scale(${(r as any).scale})` : undefined} />
 								<span class="robot-qty">×{r.qty}</span>
 							</div>
 							<div class="robot-meta">
@@ -138,7 +140,7 @@ const partners = [
 				<div class="face-marquee" role="img" aria-label="MARS Lab members">
 					{faceRows.map((row, ri) => (
 						<div class="face-row">
-							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${60 + ri * 10}s`}>
+							<div class:list={["face-track", { "face-track--rev": ri % 2 === 1 }]} style={`--dur:${84 + ri * 14}s`}>
 								{[...row, ...row].map((person) => (
 									<a class="face" href={getRelativeLocaleUrl(locale, `/people#${slugify(person.name)}`)} title={person.name} aria-label={person.name}>
 										<img src={`${baseUrl}${person.image.replace(/^\//, '')}`} alt={person.name} loading="eager" decoding="async" width="80" height="80" />
@@ -155,7 +157,7 @@ const partners = [
 					{[...robotsRight, ...robotsRight].map((r) => (
 						<article class="robot-tile">
 							<div class="robot-photo">
-								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" />
+								<img src={`${baseUrl}${r.image.replace(/^\//, '')}`} alt={r.name} loading="lazy" style={(r as any).scale ? `transform: scale(${(r as any).scale})` : undefined} />
 								<span class="robot-qty">×{r.qty}</span>
 							</div>
 							<div class="robot-meta">
@@ -185,7 +187,7 @@ const partners = [
 				{newsHead.map((n) => (
 					<li class="news-item">
 						<span class="news-month">{n.month}</span>
-						<span class="news-body"><Fragment set:html={n.text} />{n.venue && <code class="news-venue">{n.venue}</code>}</span>
+						<span class="news-body">{n.venue && <code class="news-venue">{n.venue}.</code>}<Fragment set:html={n.text} /></span>
 					</li>
 				))}
 			</ol>
@@ -194,7 +196,7 @@ const partners = [
 		<!-- Highlights — horizontal-scrolling event cards (static, no hover lift) -->
 		<section class="events-section" aria-label="Lab highlights">
 			<div class="events-head">
-				<h2 class="events-heading">Highlights</h2>
+				<h2 class="events-heading">Events</h2>
 				<div class="events-controls">
 					<button class="ev-arrow ev-prev" type="button" aria-label="Scroll to previous" disabled>
 						<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -246,7 +248,9 @@ const partners = [
 		align-items: stretch;
 		justify-content: center;
 		gap: clamp(0.6rem, 2.2vw, 1.6rem);
-		height: 350px;
+		/* exactly the 3 face rows (3×104 + 2×6 gap) so the side robot columns
+		   share the same top/bottom edges as the centre photo wall */
+		height: 324px;
 		margin-top: 0.25rem;
 		overflow: hidden;
 	}
@@ -254,8 +258,8 @@ const partners = [
 	/* --- side robot columns: vertical marquee --- */
 	.showcase-col {
 		position: relative;
-		width: 146px;
-		flex: 0 0 146px;
+		width: 124px;
+		flex: 0 0 124px;
 		overflow: hidden;
 		-webkit-mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
 		        mask-image: linear-gradient(180deg, transparent, #000 9%, #000 91%, transparent);
@@ -371,19 +375,20 @@ const partners = [
 	}
 	.news-month { font-weight: 700; font-size: 0.9rem; color: var(--primary-color); white-space: nowrap; }
 	.news-body { font-size: 0.93rem; line-height: 1.55; color: var(--secondary-color); }
-	/* Inline paper links inside a news line (e.g. A2A → arXiv) */
-	.news-link {
+	/* Inline paper links inside a news line (e.g. A2A → arXiv).
+	   :global because the anchor is injected via set:html (no scoped data-astro-cid). */
+	:global(.news-link) {
 		color: var(--accent);
 		font-weight: 600;
 		text-decoration: none;
 		border-bottom: 1px solid transparent;
 		transition: border-color 0.18s ease, color 0.18s ease;
 	}
-	.news-link:hover { color: var(--accent-deep); border-bottom-color: currentColor; }
+	:global(.news-link:hover) { color: var(--accent-deep); border-bottom-color: currentColor; }
 	/* Venue is plain emphasis text — no badge box; KaTeX (Computer Modern) for a LaTeX/math feel,
 	   bold amber for key venues (CVPR, RSS 2026…) */
 	.news-venue {
-		margin-left: 0.45rem;
+		margin-right: 0.5rem;
 		font-family: "KaTeX_Main", var(--serif); font-size: 0.95rem; letter-spacing: 0;
 		color: var(--accent);
 		font-weight: 700;
@@ -422,7 +427,7 @@ const partners = [
 
 	/* static, premium cards — photos are fixed in place (no hover lift / zoom) */
 	.event-card {
-		flex: 0 0 clamp(300px, 44%, 440px);
+		flex: 0 0 clamp(200px, 30%, 293px);
 		scroll-snap-align: start;
 		display: flex; flex-direction: column;
 		text-decoration: none; color: inherit;
@@ -492,13 +497,13 @@ const partners = [
 
 	/* ===================== RESPONSIVE ===================== */
 	@media (max-width: 1000px) {
-		.showcase { height: 320px; }
-		.showcase-col { width: 122px; flex-basis: 122px; }
+		.showcase { height: 300px; }
+		.showcase-col { width: 106px; flex-basis: 106px; }
 		.face-row { height: 96px; }
 		.face { width: 72px; height: 72px; }
 	}
 	@media (max-width: 768px) {
-		.showcase { height: 300px; }
+		.showcase { height: 276px; }
 		.showcase-col { display: none; }
 		.face-row { height: 88px; }
 		.face { width: 66px; height: 66px; }
@@ -508,7 +513,7 @@ const partners = [
 		.event-card { flex-basis: 80%; }
 	}
 	@media (max-width: 480px) {
-		.showcase { height: 260px; }
+		.showcase { height: 246px; }
 		.face-row { height: 78px; }
 		.face { width: 58px; height: 58px; }
 		.event-card { flex-basis: 86%; }
