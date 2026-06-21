@@ -64,27 +64,14 @@ const robots = [
 const robotsLeft = robots;
 const robotsRight = [...robots].reverse();
 
-// ---- News (structured; show only the most recent, no expander) ----
+// ---- News (structured; venue written inline + bold, most recent down to ICLR 2026) ----
 const news = [
-	{ month: "Apr 2026",     text: 'Our paper <a href="https://arxiv.org/abs/2602.07322" target="_blank" rel="noopener noreferrer" class="news-link">A2A</a> was accepted. Congratulations to Jindou Jia and Gen Li!', venue: "RSS 2026" },
-	{ month: "Mar 2026",     text: "We received an NVIDIA Academic Grant on Robotics." },
-	{ month: "Feb 2026",  text: "Three papers (two main + one findings) were accepted.", venue: "CVPR 2026" },
-	{ month: "Feb 2026",  text: "We received a Microsoft Seed Grant from Microsoft Research Asia." },
-	{ month: "Jan 2026",   text: "Our real-world reinforcement learning paper was accepted. Congratulations to Xiangyu Chen!", venue: "ICRA 2026" },
-	{ month: "Jan 2026",   text: "Two papers were accepted. Congratulations to Xinyan Chen and Chenxi Jiang!", venue: "ICLR 2026" },
-	{ month: "Nov 2025",  text: "Three papers were accepted.", venue: "AAAI 2026" },
-	{ month: "Sep 2025", text: "Three papers (HoloLLM, Benford's Curse, and Intend to Move) were accepted.", venue: "NeurIPS 2025" },
-	{ month: "Aug 2025",    text: "We welcomed five new members to the lab." },
-	{ month: "Jun 2025",      text: "Two papers were accepted.", venue: "IROS 2025" },
-	{ month: "May 2025",       text: "Our humanoid robot MARS-H joined the lab." },
-	{ month: "Feb 2025",  text: "We established a partnership with Abio for robotic lab automation." },
-	{ month: "Feb 2025",  text: "Our project was supported by Microsoft Accelerating Foundation Models Research." },
-	{ month: "Feb 2025",  text: "Our Feedback Neural Network paper was selected as an oral (top 1.8%).", venue: "ICLR 2025" },
-	{ month: "Jan 2025",   text: "Two papers (X-Fi and Feedback Neural Network) were accepted.", venue: "ICLR 2025" },
-	{ month: "Jan 2025",   text: "Our point registration paper was accepted. Congratulations to Geng Li!", venue: "ICRA 2025" },
-	{ month: "Jan 2025",   text: "The lab joined Project Aria by Meta." },
-	{ month: "Sep 2024", text: "Chuhao Zhou won first place at the Data Distillation Challenge.", venue: "ECCV 2024" },
-	{ month: "Sep 2024", text: "The MARS Lab officially launched at the Robotics Research Centre, NTU." },
+	{ month: "Apr 2026", text: '<strong>Our paper <a href="https://arxiv.org/abs/2602.07322" target="_blank" rel="noopener noreferrer" class="news-link">A2A</a> is accepted by RSS 2026.</strong> Congratulations to Jindou Jia and Gen Li!' },
+	{ month: "Mar 2026", text: "<strong>We received an NVIDIA Academic Grant on Robotics.</strong>" },
+	{ month: "Feb 2026", text: "<strong>Three papers (two main + one findings) are accepted by CVPR 2026.</strong>" },
+	{ month: "Feb 2026", text: "<strong>We received a Microsoft Seed Grant from Microsoft Research Asia.</strong>" },
+	{ month: "Jan 2026", text: "<strong>Our real-world reinforcement learning paper is accepted by ICRA 2026.</strong> Congratulations to Xiangyu Chen!" },
+	{ month: "Jan 2026", text: "<strong>Two papers are accepted by ICLR 2026.</strong> Congratulations to Xinyan Chen and Chenxi Jiang!" },
 ];
 const NEWS_VISIBLE = 9;
 const newsHead = news.slice(0, NEWS_VISIBLE);
@@ -110,7 +97,7 @@ const partners = [
 	{ file: "google.svg",    name: "Google" },
 	{ file: "microsoft.svg", name: "Microsoft" },
 	{ file: "sharpa.svg",    name: "Sharpa" },
-	{ file: "rokae.png",     name: "ROKAE" },
+	{ file: "rokae.svg",     name: "ROKAE" },
 	{ file: "unitree.svg",   name: "Unitree" },
 ];
 ---
@@ -187,7 +174,7 @@ const partners = [
 				{newsHead.map((n) => (
 					<li class="news-item">
 						<span class="news-month">{n.month}</span>
-						<span class="news-body">{n.venue && <code class="news-venue">{n.venue}.</code>}<Fragment set:html={n.text} /></span>
+						<span class="news-body"><Fragment set:html={n.text} /></span>
 					</li>
 				))}
 			</ol>
@@ -385,15 +372,6 @@ const partners = [
 		transition: border-color 0.18s ease, color 0.18s ease;
 	}
 	:global(.news-link:hover) { color: var(--accent-deep); border-bottom-color: currentColor; }
-	/* Venue is plain emphasis text — no badge box; KaTeX (Computer Modern) for a LaTeX/math feel,
-	   bold amber for key venues (CVPR, RSS 2026…) */
-	.news-venue {
-		margin-right: 0.5rem;
-		font-family: "KaTeX_Main", var(--serif); font-size: 0.95rem; letter-spacing: 0;
-		color: var(--accent);
-		font-weight: 700;
-		background: none; border: none; padding: 0;
-	}
 
 	/* ===================== HIGHLIGHTS (horizontal events) ===================== */
 	.events-section { display: flex; flex-direction: column; gap: 1.15rem; }
