@@ -36,8 +36,8 @@ import reading from "./src/utils/remark/reading";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://morpheus-an.github.io",  // standalone fork (Morpheus-An) — deploys independently of the upstream Lorenzo-0-0 repo
-  base: "/marslab-website",  // GitHub Pages project subpath; set to "/" when moving to marslab.tech
+  site: "https://marslab.tech",  // custom apex domain (NTUMARS org Pages)
+  base: "/",  // served at the domain root, not a project subpath
   trailingSlash: "never",
   i18n: {
     locales: ["en"],
