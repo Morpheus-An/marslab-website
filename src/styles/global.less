@@ -94,27 +94,62 @@
 	display: inline-block;
 }
 
-/* Header logo: elegant amber glow on hover. drop-shadow hugs the logo's shape
-   (transparent PNG) rather than a box → soft luminous bloom. Scoped to the
-   header so the footer logo is unaffected. */
+/* Header logo hover — refined, not neon. A soft warm sheen glides ONCE across
+   the logo's own silhouette (masked to its alpha shape), with a faint glow and
+   a gentle lift. Scoped to the header so the footer logo is untouched. */
 .site-logo {
-	transition: filter 0.45s cubic-bezier(0.22, 0.68, 0.28, 1), transform 0.45s cubic-bezier(0.22, 0.68, 0.28, 1);
+	transition: filter 0.5s cubic-bezier(0.22, 0.68, 0.28, 1), transform 0.5s cubic-bezier(0.22, 0.68, 0.28, 1);
 }
-header a:hover .site-logo {
-	filter: drop-shadow(0 0 2px rgba(180, 83, 9, 0.5))
-		drop-shadow(0 0 9px rgba(180, 83, 9, 0.32))
-		drop-shadow(0 0 20px rgba(180, 83, 9, 0.16))
+header a:has(.site-logo) {
+	position: relative;
+	display: inline-block;
+	isolation: isolate;
+}
+/* sheen overlay, clipped to the logo shape via the PNG's alpha as a mask */
+header a:has(.site-logo)::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	opacity: 0;
+	background: linear-gradient(115deg,
+		transparent 40%,
+		rgba(255, 247, 228, 0.55) 48%,
+		rgba(255, 238, 205, 0.85) 50%,
+		rgba(255, 247, 228, 0.55) 52%,
+		transparent 60%);
+	background-size: 230% 100%;
+	background-position: 175% 0;
+	-webkit-mask: url(/mars_lab_logo_black.png) center / contain no-repeat;
+	mask: url(/mars_lab_logo_black.png) center / contain no-repeat;
+	mix-blend-mode: screen;
+}
+header a:has(.site-logo):hover .site-logo {
+	transform: translateY(-1px) scale(1.015);
+	/* soft champagne-gold bloom — luminous, not the old burnt-orange neon */
+	filter: drop-shadow(0 0 5px rgba(214, 158, 92, 0.42))
+		drop-shadow(0 0 14px rgba(214, 158, 92, 0.24))
+		drop-shadow(0 0 28px rgba(214, 158, 92, 0.12))
 		brightness(1.03);
-	transform: translateY(-1px);
 }
-[data-theme="dark"] header a:hover .site-logo {
-	filter: drop-shadow(0 0 2px rgba(255, 236, 210, 0.55))
-		drop-shadow(0 0 11px rgba(217, 119, 46, 0.42))
-		drop-shadow(0 0 24px rgba(217, 119, 46, 0.22))
+[data-theme="dark"] header a:has(.site-logo):hover .site-logo {
+	filter: drop-shadow(0 0 5px rgba(247, 220, 170, 0.5))
+		drop-shadow(0 0 16px rgba(232, 180, 110, 0.32))
+		drop-shadow(0 0 30px rgba(232, 180, 110, 0.16))
 		brightness(1.05);
 }
+header a:has(.site-logo):hover::after {
+	animation: logo-sheen 0.9s cubic-bezier(0.33, 0.1, 0.25, 1);
+}
+@keyframes logo-sheen {
+	0%   { background-position: 175% 0; opacity: 0; }
+	15%  { opacity: 1; }
+	85%  { opacity: 1; }
+	100% { background-position: -75% 0; opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
-	header a:hover .site-logo { transform: none; }
+	header a:has(.site-logo):hover .site-logo { transform: none; }
+	header a:has(.site-logo)::after { display: none; }
 }
 
 * {
