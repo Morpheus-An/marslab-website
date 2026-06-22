@@ -66,12 +66,12 @@ const robotsRight = [...robots].reverse();
 
 // ---- News (structured; venue written inline + bold, most recent down to ICLR 2026) ----
 const news = [
-	{ month: "Apr 2026", text: '<strong>Our paper <a href="https://arxiv.org/abs/2602.07322" target="_blank" rel="noopener noreferrer" class="news-link">A2A</a> is accepted by RSS 2026.</strong> Congratulations to Jindou Jia and Gen Li!' },
-	{ month: "Mar 2026", text: "<strong>We received an NVIDIA Academic Grant on Robotics.</strong>" },
-	{ month: "Feb 2026", text: "<strong>Three papers (two main + one findings) are accepted by CVPR 2026.</strong>" },
-	{ month: "Feb 2026", text: "<strong>We received a Microsoft Seed Grant from Microsoft Research Asia.</strong>" },
-	{ month: "Jan 2026", text: "<strong>Our real-world reinforcement learning paper is accepted by ICRA 2026.</strong> Congratulations to Xiangyu Chen!" },
-	{ month: "Jan 2026", text: "<strong>Two papers are accepted by ICLR 2026.</strong> Congratulations to Xinyan Chen and Chenxi Jiang!" },
+	{ month: "Apr 2026", text: '<strong>Our paper <a href="https://arxiv.org/abs/2602.07322" target="_blank" rel="noopener noreferrer" class="news-link">A2A</a> is accepted by <span class="news-em">RSS 2026</span>.</strong> Congratulations to Jindou Jia and Gen Li!' },
+	{ month: "Mar 2026", text: '<strong>We received an <span class="news-em">NVIDIA Academic Grant</span> on Robotics.</strong>' },
+	{ month: "Feb 2026", text: '<strong>Three papers (two main + one findings) are accepted by <span class="news-em">CVPR 2026</span>.</strong>' },
+	{ month: "Feb 2026", text: '<strong>We received a <span class="news-em">Microsoft Seed Grant</span> from Microsoft Research Asia.</strong>' },
+	{ month: "Jan 2026", text: '<strong>Our real-world reinforcement learning paper is accepted by <span class="news-em">ICRA 2026</span>.</strong> Congratulations to Xiangyu Chen!' },
+	{ month: "Jan 2026", text: '<strong>Two papers are accepted by <span class="news-em">ICLR 2026</span>.</strong> Congratulations to Xinyan Chen and Chenxi Jiang!' },
 ];
 const NEWS_VISIBLE = 9;
 const newsHead = news.slice(0, NEWS_VISIBLE);
@@ -366,12 +366,14 @@ const partners = [
 	   :global because the anchor is injected via set:html (no scoped data-astro-cid). */
 	:global(.news-link) {
 		color: var(--accent);
-		font-weight: 600;
+		font-weight: 700;
 		text-decoration: none;
 		border-bottom: 1px solid transparent;
 		transition: border-color 0.18s ease, color 0.18s ease;
 	}
 	:global(.news-link:hover) { color: var(--accent-deep); border-bottom-color: currentColor; }
+	/* Key venue/grant terms highlighted in the lab's gold-orange accent. */
+	:global(.news-em) { color: var(--accent); font-weight: 700; }
 
 	/* ===================== HIGHLIGHTS (horizontal events) ===================== */
 	.events-section { display: flex; flex-direction: column; gap: 1.15rem; }
