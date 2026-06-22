@@ -94,6 +94,29 @@
 	display: inline-block;
 }
 
+/* Header logo: elegant amber glow on hover. drop-shadow hugs the logo's shape
+   (transparent PNG) rather than a box → soft luminous bloom. Scoped to the
+   header so the footer logo is unaffected. */
+.site-logo {
+	transition: filter 0.45s cubic-bezier(0.22, 0.68, 0.28, 1), transform 0.45s cubic-bezier(0.22, 0.68, 0.28, 1);
+}
+header a:hover .site-logo {
+	filter: drop-shadow(0 0 2px rgba(180, 83, 9, 0.5))
+		drop-shadow(0 0 9px rgba(180, 83, 9, 0.32))
+		drop-shadow(0 0 20px rgba(180, 83, 9, 0.16))
+		brightness(1.03);
+	transform: translateY(-1px);
+}
+[data-theme="dark"] header a:hover .site-logo {
+	filter: drop-shadow(0 0 2px rgba(255, 236, 210, 0.55))
+		drop-shadow(0 0 11px rgba(217, 119, 46, 0.42))
+		drop-shadow(0 0 24px rgba(217, 119, 46, 0.22))
+		brightness(1.05);
+}
+@media (prefers-reduced-motion: reduce) {
+	header a:hover .site-logo { transform: none; }
+}
+
 * {
 	margin: 0;
 	border: none;

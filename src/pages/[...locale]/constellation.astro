@@ -47,7 +47,7 @@ const constellation = ringBuckets.map((members, ri) => {
 	<main class="constellation-page">
 		<header class="cp-head">
 			<h1 class="cp-title">The MARS Lab</h1>
-			<p class="cp-sub">Prof. Jianfei Yang and the people who orbit the lab — hover a face to meet them.</p>
+			<p class="cp-sub">Hover a face to meet the team.</p>
 		</header>
 
 		<div class="constellation-wrap">
@@ -56,7 +56,7 @@ const constellation = ringBuckets.map((members, ri) => {
 					<span class="orbit-ring" style={`--d:${cfg.radius * 2}px`} aria-hidden="true"></span>
 				))}
 
-				<a href={getRelativeLocaleUrl(locale, `/people#${slugify(pi.name)}`)} class="sun" title={pi.name}>
+				<a href={getRelativeLocaleUrl(locale, `/people#${slugify(pi.name)}`)} class="sun" title={pi.name} data-no-swup>
 					<span class="sun-halo" aria-hidden="true"></span>
 					<img src={`${baseUrl}${pi.image.replace(/^\//, '')}`} alt={pi.name} loading="eager" width="128" height="128" />
 					<span class="planet-label sun-label">{pi.name}</span>
@@ -69,6 +69,7 @@ const constellation = ringBuckets.map((members, ri) => {
 								class="planet"
 								href={getRelativeLocaleUrl(locale, `/people#${m.id}`)}
 								title={m.person.name}
+								data-no-swup
 								style={`--angle:${m.angle}deg; --radius:${ring.radius}px; --size:${ring.size}px; --dur:${ring.duration}s`}
 							>
 								<span class="planet-spin">
@@ -125,7 +126,7 @@ const constellation = ringBuckets.map((members, ri) => {
 		border: 3px solid var(--background-color);
 		box-shadow: 0 6px 20px rgba(42, 42, 40, 0.20), 0 0 0 1px rgba(42, 42, 40, 0.06);
 		position: relative; z-index: 1;
-		transition: box-shadow 0.3s ease;
+		transition: box-shadow 0.3s ease, transform 0.35s cubic-bezier(0.22, 0.68, 0.28, 1);
 	}
 	.sun-halo {
 		position: absolute; inset: -8px; border-radius: 50%;
@@ -133,10 +134,12 @@ const constellation = ringBuckets.map((members, ri) => {
 		box-shadow: 0 0 0 6px rgba(180, 83, 9, 0.05);
 		pointer-events: none;
 	}
-	.sun:hover img { box-shadow: 0 10px 28px rgba(42, 42, 40, 0.28), 0 0 0 1px rgba(42, 42, 40, 0.06); }
+	.sun:hover img { transform: scale(1.08); box-shadow: 0 12px 30px rgba(42, 42, 40, 0.30), 0 0 0 2px var(--accent); }
 
-	/* orbit ring container — slow drift */
-	.orbit { position: absolute; inset: 0; animation: orbit-spin var(--dur) linear infinite; z-index: 20; }
+	/* orbit ring container — slow drift. pointer-events:none so the full-size
+	   rotating wrapper doesn't intercept hovers/clicks for inner-ring avatars;
+	   the avatars (.planet) re-enable events on themselves. */
+	.orbit { position: absolute; inset: 0; animation: orbit-spin var(--dur) linear infinite; z-index: 20; pointer-events: none; }
 	.orbit--rev { animation-direction: reverse; }
 
 	.planet {
@@ -144,6 +147,7 @@ const constellation = ringBuckets.map((members, ri) => {
 		width: var(--size); height: var(--size);
 		margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
 		transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius)));
+		pointer-events: auto;   /* re-enable events the .orbit wrapper turned off */
 	}
 	/* counter-spin keeps faces upright */
 	.planet-spin {
@@ -183,14 +187,19 @@ const constellation = ringBuckets.map((members, ri) => {
 		to   { transform: rotate(calc(-1 * var(--angle) - 360deg)); }
 	}
 
-	/* hover: pause the drift only when over an avatar, dim the rest, lift the chosen one */
+	/* hover: pause the drift over any avatar, dim the rest, lift the chosen one.
+	   sun + planets are treated uniformly so the centre behaves like every node. */
 	.constellation:has(.planet:hover) .orbit,
 	.constellation:has(.planet:hover) .planet-spin,
+	.constellation:has(.sun:hover) .orbit,
+	.constellation:has(.sun:hover) .planet-spin,
 	.constellation:focus-within .orbit,
 	.constellation:focus-within .planet-spin { animation-play-state: paused; }
 
 	.constellation:has(.planet:hover) .planet,
+	.constellation:has(.sun:hover) .planet,
 	.constellation:focus-within .planet { opacity: 0.35; transition: opacity 0.3s ease; }
+	.constellation:has(.planet:hover) .sun { opacity: 0.35; transition: opacity 0.3s ease; }
 	.constellation:has(.planet:hover) .planet:hover,
 	.constellation:focus-within .planet:focus-visible { opacity: 1; z-index: 40; }
 
