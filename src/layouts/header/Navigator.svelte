@@ -5,23 +5,38 @@
 			display: inline-block;
 
 			p {
-				padding: 5px 12px;
+				padding: 5px 14px;
 				font-size: 1.1rem;
 				text-align: center;
 				letter-spacing: 0.015em;
 				color: var(--primary-color);
 				background-color: transparent;
-				transition: color 0.15s ease, background-color 0.15s ease;
+				border-radius: 7px;
+				transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 			}
 
-			/* filled dark box on hover and for the active section */
+			/* Filled "Mars-gold" pill on hover and for the active section — a deep,
+			   textured amber gradient (accent → accent-deep) with a soft top sheen and
+			   a warm drop shadow so it reads premium rather than a flat block. */
 			&:hover p,
 			&.location p {
-				color: var(--background-color);
-				background-color: var(--primary-color);
+				color: #fff8ee;
+				background: linear-gradient(150deg, var(--accent) 0%, var(--accent-deep) 100%);
+				box-shadow:
+					inset 0 1px 0 rgba(255, 244, 224, 0.28),
+					inset 0 -1px 2px rgba(74, 31, 4, 0.30),
+					0 2px 8px rgba(138, 61, 7, 0.30);
 			}
 
-			&.location p { font-weight: 600; }
+			&.location p {
+				font-weight: 600;
+				/* slightly deeper + a touch more lift for the current page */
+				background: linear-gradient(150deg, var(--accent-deep) 0%, #6f3005 100%);
+				box-shadow:
+					inset 0 1px 0 rgba(255, 244, 224, 0.30),
+					inset 0 -1px 2px rgba(60, 24, 2, 0.35),
+					0 3px 10px rgba(110, 48, 5, 0.34);
+			}
 	}
 }
 
