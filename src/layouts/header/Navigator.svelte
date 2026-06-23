@@ -14,7 +14,7 @@
 				letter-spacing: 0.01em;
 				color: var(--primary-color);
 				background-color: transparent;
-				border-radius: 7px;
+				border-radius: 0;
 				transition: color 0.2s ease, background-color 0.2s ease;
 			}
 
