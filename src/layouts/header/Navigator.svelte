@@ -6,9 +6,12 @@
 
 			p {
 				padding: 5px 14px;
-				font-size: 1.1rem;
+				/* Computer Modern (TeX/LaTeX) via KaTeX — premium "mathematical" American
+				   wordmark feel; Latin-only, so CJK locales fall back to var(--serif). */
+				font-family: "KaTeX_Main", var(--serif);
+				font-size: 1.12rem;
 				text-align: center;
-				letter-spacing: 0.015em;
+				letter-spacing: 0.01em;
 				color: var(--primary-color);
 				background-color: transparent;
 				border-radius: 7px;
@@ -21,6 +24,8 @@
 			&:hover p,
 			&.location p {
 				color: #fff8ee;
+				/* bold Computer Modern on the gold pill; resting words stay regular */
+				font-weight: 700;
 				background: linear-gradient(150deg, var(--accent) 0%, var(--accent-deep) 100%);
 				box-shadow:
 					inset 0 1px 0 rgba(255, 244, 224, 0.28),
@@ -29,7 +34,6 @@
 			}
 
 			&.location p {
-				font-weight: 600;
 				/* slightly deeper + a touch more lift for the current page */
 				background: linear-gradient(150deg, var(--accent-deep) 0%, #6f3005 100%);
 				box-shadow:
