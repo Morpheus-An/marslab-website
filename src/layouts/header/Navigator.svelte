@@ -15,30 +15,15 @@
 				color: var(--primary-color);
 				background-color: transparent;
 				border-radius: 7px;
-				transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+				transition: color 0.2s ease, background-color 0.2s ease;
 			}
 
-			/* Filled "Mars-gold" pill on hover and for the active section — a deep,
-			   textured amber gradient (accent → accent-deep) with a soft top sheen and
-			   a warm drop shadow so it reads premium rather than a flat block. */
+			/* Simple flat brand-gold box on hover + for the active section —
+			   reverted from the gradient/sheen pill (keep the colour, drop the effects, per user). */
 			&:hover p,
 			&.location p {
-				color: #fff8ee;
-				/* uniform regular Computer Modern — no bold anywhere (per user) */
-				background: linear-gradient(150deg, var(--accent) 0%, var(--accent-deep) 100%);
-				box-shadow:
-					inset 0 1px 0 rgba(255, 244, 224, 0.28),
-					inset 0 -1px 2px rgba(74, 31, 4, 0.30),
-					0 2px 8px rgba(138, 61, 7, 0.30);
-			}
-
-			&.location p {
-				/* slightly deeper + a touch more lift for the current page */
-				background: linear-gradient(150deg, var(--accent-deep) 0%, #6f3005 100%);
-				box-shadow:
-					inset 0 1px 0 rgba(255, 244, 224, 0.30),
-					inset 0 -1px 2px rgba(60, 24, 2, 0.35),
-					0 3px 10px rgba(110, 48, 5, 0.34);
+				color: var(--background-color);
+				background-color: var(--accent-deep);
 			}
 	}
 }

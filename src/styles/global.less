@@ -152,6 +152,16 @@ header a:has(.site-logo):hover::after {
 	header a:has(.site-logo)::after { display: none; }
 }
 
+/* Emphasis underline in the brand "Mars-gold" accent — used to mark key phrases
+   in the home intro and Contact copy. Works across line-wraps (text-decoration). */
+.accent-underline {
+	text-decoration-line: underline;
+	text-decoration-color: var(--accent);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 0.18em;
+	text-decoration-skip-ink: auto;
+}
+
 * {
 	margin: 0;
 	border: none;
