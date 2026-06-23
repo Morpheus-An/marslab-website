@@ -3,6 +3,19 @@ import Base from "$layouts/Base.astro";
 ---
 
 <Base title="404">
+	{/* Catch-all redirect for the OLD site's per-member pages (/members/<slug>.html),
+	    which search engines still have indexed. The new site lists everyone on /people
+	    with card ids = name lowercased, letters only — so the old hyphenated slug maps
+	    straight onto the anchor by stripping non-letters. */}
+	<script is:inline>
+		(function () {
+			var m = location.pathname.match(/\/members\/(.+?)\.html?$/i);
+			if (m) {
+				var anchor = decodeURIComponent(m[1]).toLowerCase().replace(/[^a-z]/g, "");
+				location.replace("/people/" + (anchor ? "#" + anchor : ""));
+			}
+		})();
+	</script>
 	<main class="contents">
 		<div class="inline-flex flex-col items-center justify-center gap-2 text-center grow-0.5 animate-shaky">
 			<span class="text-6xl font-bold">404</span>
