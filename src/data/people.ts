@@ -12,7 +12,8 @@ export const people = [
 			website: "https://marsyang.site/",
 			email: "jianfei.yang@ntu.edu.sg",
 			scholar: "https://scholar.google.com.sg/citations?user=V25k08UAAAAJ&hl=en",
-			linkedin: "https://www.linkedin.com/in/jianfei-yang-55560386/"
+			linkedin: "https://www.linkedin.com/in/jianfei-yang-55560386/",
+			twitter: "https://x.com/Jianfei_AI"
 		}
 	},
 	// Postdocs
