@@ -504,41 +504,26 @@ const partners = [
 </style>
 
 <script>
-	// Highlights scroller — prev/next arrows + edge state.
-	// rAF-driven scroll (no reliance on CSS smooth-scroll, which raced on first click).
-	// Guarded per element so it re-inits cleanly after Swup swaps the DOM.
+	// Events scroller — prev/next arrows + edge (disabled) state.
+	// Uses the native scrollBy({behavior:"smooth"}) API rather than a hand-rolled
+	// requestAnimationFrame tween. The old per-frame `scrollLeft = …` writes were
+	// reliable in Chromium but flaky in WebKit/Safari (root `scroll-behavior:smooth`
+	// leaks onto descendant scroll boxes, so each frame restarted its own smooth
+	// animation and the position never advanced → the arrows appeared to "do
+	// nothing"). Native scrollBy animates once and behaves consistently across
+	// engines; a real button click is a user gesture, so smooth scrolling is honoured.
 	function setupEventsScroller() {
 		const scroller = document.querySelector('.events-scroller') as HTMLElement | null;
-		if (!scroller || scroller.dataset.evReady === '1') return;
-		scroller.dataset.evReady = '1';
+		if (!scroller) return;
 
 		const prev = document.querySelector('.ev-prev') as HTMLButtonElement | null;
 		const next = document.querySelector('.ev-next') as HTMLButtonElement | null;
 		const card = scroller.querySelector('.event-card') as HTMLElement | null;
 
 		const step = () => (card ? card.getBoundingClientRect().width + 20 : scroller.clientWidth * 0.8);
-		const clamp = (v: number) => Math.max(0, Math.min(v, scroller.scrollWidth - scroller.clientWidth));
-
-		let raf = 0;
-		// easeInOutCubic — gentle acceleration AND deceleration (no abrupt start/stop).
-		// rAF tween (direct scrollLeft) is used instead of native smooth-scroll because the
-		// latter silently no-ops without user activation; this is reliable + smooth at 60fps.
-		const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-		function animateTo(to: number) {
-			cancelAnimationFrame(raf);
-			const from = scroller!.scrollLeft;
-			const dist = clamp(to) - from;
-			if (Math.abs(dist) < 1) return;
-			let t0 = 0;
-			const dur = 600;
-			function frame(now: number) {
-				if (!t0) t0 = now;
-				const t = Math.min(1, (now - t0) / dur);
-				scroller!.scrollLeft = from + dist * ease(t);
-				if (t < 1) raf = requestAnimationFrame(frame);
-			}
-			raf = requestAnimationFrame(frame);
-		}
+		const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const nudge = (dir: number) =>
+			scroller.scrollBy({ left: dir * step(), behavior: reduce ? 'auto' : 'smooth' });
 
 		const update = () => {
 			const max = scroller.scrollWidth - scroller.clientWidth - 8;
@@ -546,10 +531,15 @@ const partners = [
 			if (next) next.disabled = scroller.scrollLeft >= max;
 		};
 
-		if (prev) prev.addEventListener('click', () => animateTo(scroller.scrollLeft - step()));
-		if (next) next.addEventListener('click', () => animateTo(scroller.scrollLeft + step()));
-		scroller.addEventListener('scroll', update, { passive: true });
-		window.addEventListener('resize', update);
+		// Bind handlers once per element; update() still runs on every (re-)init so the
+		// disabled state is correct after Swup swaps in a fresh DOM.
+		if (scroller.dataset.evReady !== '1') {
+			scroller.dataset.evReady = '1';
+			prev?.addEventListener('click', () => nudge(-1));
+			next?.addEventListener('click', () => nudge(1));
+			scroller.addEventListener('scroll', update, { passive: true });
+			window.addEventListener('resize', update);
+		}
 		update();
 	}
 	setupEventsScroller();
