@@ -77,7 +77,8 @@ export const people = [
 		bio: "Xinyu Zhou is a Research Fellow at the NTU MARS Lab, working with Prof. Jianfei Yang.",
 		research: "Xinyu's research lies at the intersection of Embodied AI, human-robot collaboration, robotic manipulation, and embodied tracking, including vision-language-action models, diffusion-based robot policies, and generative visuomotor learning for long-horizon tasks in interactive real-world environments.",
 		links: {
-			email: "xinyu.zhou@ntu.edu.sg"
+			email: "xinyu.zhou@ntu.edu.sg",
+			scholar: "https://scholar.google.com/citations?user=Zdm-YgkAAAAJ&hl=zh-CN"
 		}
 	},
 	{
