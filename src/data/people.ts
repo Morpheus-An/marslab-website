@@ -297,27 +297,26 @@ export const students = [
 	{
 		group: "MSc Students",
 		members: [
-			{ name: "Shiyu Liu", advisor: "Dr. Boyu Ma" },
-			{ name: "Daoyuan Zhu", advisor: "Dr. Boyu Ma" },
-			{ name: "Bin Zhou", advisor: "Dr. Boyu Ma" },
-			{ name: "Chenxi Wen", advisor: "Dr. Boyu Ma" },
-			{ name: "Yining Zhou", advisor: "Dr. Boyu Ma" },
-			{ name: "Houwang Chen", advisor: "Dr. Boyu Ma" },
-			{ name: "Yizhou Liu", advisor: "Dr. Boyu Ma" },
-			{ name: "Beichen Wang", advisor: "Dr. Boyu Ma" },
-			{ name: "Bailiang Chen", advisor: "Dr. Boyu Ma" },
-			{ name: "Fengrui Huang", advisor: "Dr. Xinyu Zhou" },
-			{ name: "Zikun Cai", advisor: "Dr. Xinyu Zhou" },
-			{ name: "Yutong Song", advisor: "Dr. Xinyu Zhou" },
-			{ name: "Weiren Cai", advisor: "Dr. Xinyu Zhou" },
-			{ name: "Haodong Wu", advisor: "Dr. Xinyu Zhou" },
-			{ name: "Maokuan Xu", advisor: "Dr. Xinyu Zhou" }
+			{ name: "Shiyu Liu", advisor: "Dr. Boyu Ma", topic: "Collision-Free Generative Imitation Learning for Robot Motion Planning" },
+			{ name: "Daoyuan Zhu", advisor: "Dr. Boyu Ma", topic: "Continual Policy Learning for Humanoid Robot Locomotion" },
+			{ name: "Bin Zhou", advisor: "Dr. Boyu Ma", topic: "Generalizable Grasping Policy for Dexterous Robotic Hands" },
+			{ name: "Chenxi Wen", advisor: "Dr. Boyu Ma", topic: "Interaction-Aware Representation Learning for Robotic Manipulation" },
+			{ name: "Yining Zhou", advisor: "Dr. Boyu Ma", topic: "Configuration-Prior-Aware Robotic Diffusion Policy" },
+			{ name: "Houwang Chen", advisor: "Dr. Boyu Ma", topic: "Instruction-Grounded Robotic Grasping via Embodied Skill Learning" },
+			{ name: "Yizhou Liu", advisor: "Dr. Boyu Ma", topic: "Capability-Aware Embodied Policy Learning for Language-Guided Manipulation" },
+			{ name: "Beichen Wang", advisor: "Dr. Boyu Ma", topic: "Robust Visual Enhancement and Perception under Degraded Illumination" },
+			{ name: "Bailiang Chen", advisor: "Dr. Boyu Ma", topic: "Bimanual Dexterous Manipulation via Multi-Level Motion Planning" },
+			{ name: "Fengrui Huang", advisor: "Dr. Xinyu Zhou", topic: "Human-Intention-Aware Vision-Language-Action Models", year: "2026" },
+			{ name: "Zikun Cai", advisor: "Dr. Xinyu Zhou", topic: "One-Step Action Generation via Joint Conditional Action Modeling" },
+			{ name: "Weiren Cai", advisor: "Dr. Xinyu Zhou", topic: "Perception and Decision-Making for High-Speed F1 Racing" },
+			{ name: "Haodong Wu", advisor: "Dr. Xinyu Zhou", topic: "Human-Robot Interaction in Home Environments" },
+			{ name: "Maokuan Xu", advisor: "Dr. Xinyu Zhou", topic: "Human-Robot Interaction in Home Environments" }
 		]
 	},
 	{
 		group: "Undergrad Students",
 		members: [
-			{ name: "Wuqi Zhou", advisor: "Dr. Boyu Ma" },
+			{ name: "Wuqi Zhou", advisor: "Dr. Boyu Ma", topic: "Redundancy-Resolution-Based Obstacle Avoidance for Robotic Manipulators" },
 			{ name: "Mengfei Zhao", advisor: "Dr. Jindou Jia" },
 			{ name: "Yuchen Xie", advisor: "Dr. Xinyu Zhou" },
 			{ name: "Yajie Wang", advisor: "Dr. Xinyu Zhou" },

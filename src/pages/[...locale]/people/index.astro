@@ -139,7 +139,7 @@ if (others.length) sections.push({ title: "Team", members: others });
 						</summary>
 						<ul class="alumni-list student-acc-list">
 							{group.members.map((m) => (
-								<li><strong>{m.name}</strong> <span class="alumni-period">(2025)</span></li>
+								<li><strong>{m.name}</strong>{m.topic ? ` — ${m.topic}` : ""} <span class="alumni-period">({m.year ?? "2025"})</span></li>
 							))}
 						</ul>
 					</details>
